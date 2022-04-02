@@ -39,7 +39,7 @@ public class PlatformPropertyKeyServiceImpl extends ServiceImpl<PlatformProperty
         // 2. 根据平台属性id查询平台属性list
         for (PlatformPropertyKey platformPropertyKey : platformPropertyKeyList) {
             List<PlatformPropertyValue> platformPropertyValueList = platformPropertyValueService.getPlatformPropertyValueByKeyId(platformPropertyKey.getId());
-            platformPropertyKey.setPropertyValueList(platformPropertyValueList);
+            platformPropertyKey.setPlatformPropertyValueList(platformPropertyValueList);
         }
         return platformPropertyKeyList;
     }
