@@ -2,6 +2,7 @@ package com.atguigu.mapper;
 
 import com.atguigu.entity.PlatformPropertyKey;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import feign.Param;
 
 import java.util.List;
 
@@ -22,5 +23,7 @@ public interface PlatformPropertyKeyMapper extends BaseMapper<PlatformPropertyKe
      * @param category2Id 二级分类id
      * @param category3Id 三级分类id
      */
-    List<PlatformPropertyKey> getPlatformPropertyByCategoryId(Long category1Id, Long category2Id, Long category3Id);
+    List<PlatformPropertyKey> getPlatformPropertyByCategoryId(@Param("category1Id") Long category1Id,
+                                                              @Param("category2Id") Long category2Id,
+                                                              @Param("category3Id") Long category3Id);
 }
