@@ -3,6 +3,8 @@ package com.atguigu.service;
 import com.atguigu.entity.PlatformPropertyValue;
 import com.baomidou.mybatisplus.extension.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  * 属性值表 服务类
@@ -13,4 +15,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface PlatformPropertyValueService extends IService<PlatformPropertyValue> {
 
+    /**
+     * 根据平台属性id查询平台属性list
+     *
+     * @param KeyId 平台属性id
+     */
+    List<PlatformPropertyValue> getPlatformPropertyValueByKeyId(Long KeyId);
 }
