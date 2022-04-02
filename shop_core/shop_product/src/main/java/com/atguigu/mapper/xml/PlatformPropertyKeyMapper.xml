@@ -2,8 +2,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.atguigu.mapper.PlatformPropertyKeyMapper">
 
-    <select id="getPlatformPropertyByCategoryId" resultType="com.atguigu.entity.PlatformPropertyKey">
-        select * from platform_property_key a
+    <resultMap id="PlatformPropertyKeyMap" type="com.atguigu.entity.PlatformPropertyKey" autoMapping="true">
+        <id property="id" column="id"/>
+        <collection property="platformPropertyValueList" ofType="com.atguigu.entity.PlatformPropertyValue"
+                    autoMapping="true">
+            <id property="id" column="property_value_id"/>
+        </collection>
+    </resultMap>
+    <select id="getPlatformPropertyByCategoryId" resultMap="PlatformPropertyKeyMap">
+        select
+        a.id,
+        a.property_key,
+        a.category_id,
+        a.category_level,
+        b.id property_value_id,
+        b.property_key_id,
+        b.property_value
+        from platform_property_key a
+        left join platform_property_value b on a.id = b.property_key_id
         <where>
             <if test="category1Id != null and category1Id != 0">
                 or (a.category_id = #{category1Id} and a.category_level = 1)
