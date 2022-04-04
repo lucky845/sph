@@ -46,5 +46,5 @@ public class PlatformPropertyKey implements Serializable {
     @ApiModelProperty(value = "平台属性的值List")
     // 该字段不属于数据库字段
     @TableField(exist = false)
-    private List<PlatformPropertyValue> platformPropertyValueList;
+    private List<PlatformPropertyValue> propertyValueList;
 }

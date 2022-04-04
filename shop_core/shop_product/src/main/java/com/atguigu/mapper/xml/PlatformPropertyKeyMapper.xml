@@ -4,7 +4,7 @@
 
     <resultMap id="PlatformPropertyKeyMap" type="com.atguigu.entity.PlatformPropertyKey" autoMapping="true">
         <id property="id" column="id"/>
-        <collection property="platformPropertyValueList" ofType="com.atguigu.entity.PlatformPropertyValue"
+        <collection property="propertyValueList" ofType="com.atguigu.entity.PlatformPropertyValue"
                     autoMapping="true">
             <id property="id" column="property_value_id"/>
         </collection>
