@@ -7,6 +7,7 @@ import com.atguigu.result.RetVal;
 import com.atguigu.service.PlatformPropertyKeyService;
 import com.atguigu.service.PlatformPropertyValueService;
 import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
@@ -60,6 +61,7 @@ public class PlatformPropertyController {
      *
      * @param propertyKeyId 平台属性key
      */
+    @ApiOperation("根据平台属性key获取平台属性值集合")
     @GetMapping("/getPropertyValueByPropertyKeyId/{propertyKeyId}")
     public RetVal<List<PlatformPropertyValue>> getPropertyValueByPropertyKeyId(
             @ApiParam(name = "propertyKeyId", value = "平台属性key", required = true)
@@ -68,6 +70,21 @@ public class PlatformPropertyController {
         List<PlatformPropertyValue> propertyValueList =
                 propertyValueService.getPlatformPropertyValueByKeyId(propertyKeyId);
         return RetVal.ok(propertyValueList);
+    }
+
+    /**
+     * 保存修改平台属性key与value
+     *
+     * @param platformPropertyKey 平台属性key对象
+     */
+    @ApiOperation("保存修改平台属性key与value")
+    @PostMapping("/savePlatformProperty")
+    public RetVal<Object> savePlatformProperty(
+            @ApiParam(name = "platformPropertyKey", value = "平台属性key对象", required = true)
+            @RequestBody PlatformPropertyKey platformPropertyKey
+    ) {
+        propertyKeyService.savePlatformProperty(platformPropertyKey);
+        return RetVal.ok();
     }
 
 }

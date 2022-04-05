@@ -23,4 +23,12 @@ public interface PlatformPropertyKeyService extends IService<PlatformPropertyKey
      * @param category3Id 三级分类id
      */
     List<PlatformPropertyKey> getPlatformPropertyByCategoryId(Long category1Id, Long category2Id, Long category3Id);
+
+    /**
+     * 保存修改平台属性key与value
+     *
+     * @param platformPropertyKey 平台属性key对象
+     */
+    void savePlatformProperty(PlatformPropertyKey platformPropertyKey);
+
 }
