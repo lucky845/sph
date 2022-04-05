@@ -23,7 +23,6 @@ import java.util.List;
  * @since 2022-04-01
  */
 @Api(tags = "平台属性")
-@CrossOrigin
 @RestController
 @RequestMapping("/product")
 public class PlatformPropertyController {
