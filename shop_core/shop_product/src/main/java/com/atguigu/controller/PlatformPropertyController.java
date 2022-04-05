@@ -2,8 +2,10 @@ package com.atguigu.controller;
 
 
 import com.atguigu.entity.PlatformPropertyKey;
+import com.atguigu.entity.PlatformPropertyValue;
 import com.atguigu.result.RetVal;
 import com.atguigu.service.PlatformPropertyKeyService;
+import com.atguigu.service.PlatformPropertyValueService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +28,10 @@ import java.util.List;
 public class PlatformPropertyController {
 
     @Resource
-    private PlatformPropertyKeyService platformPropertyKeyService;
+    private PlatformPropertyKeyService propertyKeyService;
+
+    @Resource
+    private PlatformPropertyValueService propertyValueService;
 
     /**
      * 根据一二三级分类id获取平台属性信息
@@ -46,8 +51,23 @@ public class PlatformPropertyController {
             @ApiParam(name = "category3Id", value = "三级分类id")
             @PathVariable Long category3Id
     ) {
-        List<PlatformPropertyKey> platformPropertyKeyList = platformPropertyKeyService.getPlatformPropertyByCategoryId(category1Id, category2Id, category3Id);
+        List<PlatformPropertyKey> platformPropertyKeyList = propertyKeyService.getPlatformPropertyByCategoryId(category1Id, category2Id, category3Id);
         return RetVal.ok(platformPropertyKeyList);
+    }
+
+    /**
+     * 根据平台属性key获取平台属性值集合
+     *
+     * @param propertyKeyId 平台属性key
+     */
+    @GetMapping("/getPropertyValueByPropertyKeyId/{propertyKeyId}")
+    public RetVal<List<PlatformPropertyValue>> getPropertyValueByPropertyKeyId(
+            @ApiParam(name = "propertyKeyId", value = "平台属性key", required = true)
+            @PathVariable Long propertyKeyId
+    ) {
+        List<PlatformPropertyValue> propertyValueList =
+                propertyValueService.getPlatformPropertyValueByKeyId(propertyKeyId);
+        return RetVal.ok(propertyValueList);
     }
 
 }
