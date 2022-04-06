@@ -54,6 +54,7 @@ public class BaseBrandController {
      * @param baseBrand 品牌信息对象
      */
     @ApiOperation("添加品牌信息")
+    @PostMapping
     private RetVal<Object> saveBrand(
             @ApiParam(name = "baseBrand", value = "品牌信息对象", required = true)
             @RequestBody BaseBrand baseBrand
