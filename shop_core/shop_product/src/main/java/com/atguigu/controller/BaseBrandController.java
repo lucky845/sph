@@ -11,6 +11,7 @@ import io.swagger.annotations.ApiParam;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * <p>
@@ -107,6 +108,16 @@ public class BaseBrandController {
     ) {
         baseBrandService.removeById(brandId);
         return RetVal.ok();
+    }
+
+    /**
+     * 查询所有的品牌
+     */
+    @ApiOperation("查询所有的品牌")
+    @GetMapping("/getAllBrand")
+    public RetVal<List<BaseBrand>> getAllBrand() {
+        List<BaseBrand> baseBrandList = baseBrandService.list(null);
+        return RetVal.ok(baseBrandList);
     }
 
 }
