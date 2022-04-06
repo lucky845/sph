@@ -56,10 +56,9 @@ public class CodeGenerator {
 
         // 5、策略配置
         StrategyConfig strategy = new StrategyConfig();
-//        strategy.setInclude("base_category1", "base_category2", "base_category3", "platform_property_key", "platform_property_value");
-        strategy.setInclude("base_category1","base_category2","base_category3");
-        //strategy.setInclude("platform_property_name","platform_property_value","base_brand");
-        //strategy.setInclude("product_spu","spu_sale_property_name","spu_sale_property_value","product_image");
+//        strategy.setInclude("base_category1","base_category2","base_category3");
+//        strategy.setInclude("platform_property_key","platform_property_value","base_brand");
+        //strategy.setInclude("product_spu","product_sale_property_key","product_sale_property_value","product_image");
         //strategy.setInclude("base_sale_property");
         //strategy.setInclude("sku_info","sku_platform_property_value","sku_sale_property_value","sku_image");
         //strategy.setInclude("base_category_view");
