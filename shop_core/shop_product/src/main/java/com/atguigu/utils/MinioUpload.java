@@ -10,6 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.Resource;
 import java.io.File;
 import java.io.InputStream;
+import java.util.UUID;
 
 /**
  * @author lucky845
@@ -49,7 +50,8 @@ public class MinioUpload {
      */
     public String uploadFile(MultipartFile file) throws Exception {
         // 获取文件名称
-        String filename = file.getOriginalFilename();
+        String filename = UUID.randomUUID().toString().replaceAll("-", "")
+                + file.getOriginalFilename();
         // 使用putObject上传一个文件到存储桶中
         InputStream inputStream = file.getInputStream();
         PutObjectOptions putObjectOptions = new PutObjectOptions(inputStream.available(), -1);
