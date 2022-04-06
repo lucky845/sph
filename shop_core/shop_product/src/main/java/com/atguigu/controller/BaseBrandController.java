@@ -79,5 +79,21 @@ public class BaseBrandController {
     }
 
 
+    /**
+     * 更新品牌信息
+     *
+     * @param baseBrand 品牌信息对象
+     */
+    @ApiOperation("更新品牌信息")
+    @PutMapping
+    public RetVal<Object> updateBrand(
+            @ApiParam(name = "baseBrand", value = "品牌信息对象", required = true)
+            @RequestBody BaseBrand baseBrand
+    ) {
+        baseBrandService.updateById(baseBrand);
+        return RetVal.ok();
+    }
+
+
 }
 
