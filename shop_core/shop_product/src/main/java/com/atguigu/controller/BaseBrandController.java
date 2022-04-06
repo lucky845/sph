@@ -94,6 +94,20 @@ public class BaseBrandController {
         return RetVal.ok();
     }
 
+    /**
+     * 根据brandId删除品牌信息
+     *
+     * @param brandId 品牌id
+     */
+    @ApiOperation("根据brandId删除品牌信息")
+    @DeleteMapping("/{brandId}")
+    public RetVal<Object> deleteBrand(
+            @ApiParam(name = "brandId", value = "品牌id", required = true)
+            @PathVariable Long brandId
+    ) {
+        baseBrandService.removeById(brandId);
+        return RetVal.ok();
+    }
 
 }
 
