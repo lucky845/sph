@@ -107,5 +107,45 @@ public class SkuController {
         return RetVal.ok(page);
     }
 
+    /**
+     * 商品SKU上架
+     *
+     * @param skuId 商品skuId
+     */
+    @ApiOperation("商品SKU上架")
+    @GetMapping("/onSale/{skuId}")
+    public RetVal<Object> onSale(
+            @ApiParam(name = "skuId", value = "商品skuId", required = true)
+            @PathVariable Long skuId
+    ) {
+        SkuInfo skuInfo = new SkuInfo();
+        skuInfo.setId(skuId);
+        // (1: 是，0：否)
+        skuInfo.setIsSale(1);
+        skuInfoService.updateById(skuInfo);
+        // TODO 后面涉及到搜索的时候再添加
+        return RetVal.ok();
+    }
+
+    /**
+     * 商品SKU下架
+     *
+     * @param skuId 商品skuId
+     */
+    @ApiOperation("商品SKU下架")
+    @GetMapping("/offSale/{skuId}")
+    public RetVal<Object> offSale(
+            @ApiParam(name = "skuId", value = "商品skuId", required = true)
+            @PathVariable Long skuId
+    ) {
+        SkuInfo skuInfo = new SkuInfo();
+        skuInfo.setId(skuId);
+        // (1: 是，0：否)
+        skuInfo.setIsSale(0);
+        skuInfoService.updateById(skuInfo);
+        // TODO 后面涉及到搜索的时候再添加
+        return RetVal.ok();
+    }
+
 }
 
