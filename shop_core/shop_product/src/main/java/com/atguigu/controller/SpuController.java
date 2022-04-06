@@ -5,8 +5,10 @@ package com.atguigu.controller;
  * @date 2022年04月06日 13:46
  */
 
+import com.atguigu.entity.BaseSaleProperty;
 import com.atguigu.entity.ProductSpu;
 import com.atguigu.result.RetVal;
+import com.atguigu.service.BaseSalePropertyService;
 import com.atguigu.service.ProductSpuService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.util.List;
 
 /**
  * <p>
@@ -35,6 +38,9 @@ public class SpuController {
 
     @Resource
     private ProductSpuService spuService;
+
+    @Resource
+    private BaseSalePropertyService salePropertyService;
 
     /**
      * 根据分类id查询商品SPU分页信息
@@ -60,6 +66,16 @@ public class SpuController {
         wrapper.eq("category3_id", category3Id).orderByDesc("id");
         spuService.page(page, wrapper);
         return RetVal.ok(page);
+    }
+
+    /**
+     * 查询所有的销售属性
+     */
+    @ApiOperation("查询所有的销售属性")
+    @GetMapping("/queryAllSaleProperty")
+    public RetVal<List<BaseSaleProperty>> queryAllSaleProperty() {
+        List<BaseSaleProperty> salePropertyList = salePropertyService.list(null);
+        return RetVal.ok(salePropertyList);
     }
 
 }
