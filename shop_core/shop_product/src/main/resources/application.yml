@@ -45,3 +45,7 @@ spring:
   jackson:
     date-format: yyyy-MM-dd HH:mm:ss
     time-zone: GMT+8
+
+# fastdfs地址
+fastdfs:
+  fix: http://192.168.229.128:8888/
