@@ -3,17 +3,16 @@ package com.atguigu.controller;
 
 import com.atguigu.entity.ProductImage;
 import com.atguigu.entity.ProductSalePropertyKey;
+import com.atguigu.entity.SkuInfo;
 import com.atguigu.result.RetVal;
 import com.atguigu.service.ProductImageService;
 import com.atguigu.service.ProductSalePropertyKeyService;
+import com.atguigu.service.SkuInfoService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -36,6 +35,9 @@ public class SkuController {
 
     @Resource
     private ProductImageService productImageService;
+
+    @Resource
+    private SkuInfoService skuInfoService;
 
     /**
      * 根据SPUId查询销售属性
@@ -67,6 +69,21 @@ public class SkuController {
         wrapper.eq("product_id", spuId);
         List<ProductImage> productImageList = productImageService.list(wrapper);
         return RetVal.ok(productImageList);
+    }
+
+    /**
+     * 保存商品SKU信息
+     *
+     * @param skuInfo 商品SKU对象
+     */
+    @ApiOperation("保存SKU信息")
+    @PostMapping("/saveSkuInfo")
+    public RetVal<Object> saveSkuInfo(
+            @ApiParam(name = "skuInfo", value = "商品SKU对象", required = true)
+            @RequestBody SkuInfo skuInfo
+    ) {
+        skuInfoService.saveSkuInfo(skuInfo);
+        return RetVal.ok();
     }
 
 }
