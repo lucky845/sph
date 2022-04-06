@@ -48,6 +48,7 @@ public class PlatformPropertyKeyServiceImpl extends ServiceImpl<PlatformProperty
     @Transactional(rollbackFor = Exception.class)
     @Override
     public void savePlatformProperty(PlatformPropertyKey platformPropertyKey) {
+        Long propertyKeyId = platformPropertyKey.getId();
         if (platformPropertyKey.getId() != null) {
             // 修改
             baseMapper.updateById(platformPropertyKey);
@@ -56,10 +57,13 @@ public class PlatformPropertyKeyServiceImpl extends ServiceImpl<PlatformProperty
             baseMapper.insert(platformPropertyKey);
         }
         QueryWrapper<PlatformPropertyValue> wrapper = new QueryWrapper<>();
-        wrapper.eq("property_key_id", platformPropertyKey.getId());
+        wrapper.eq("property_key_id", propertyKeyId);
         propertyValueService.remove(wrapper);
         List<PlatformPropertyValue> propertyValueList = platformPropertyKey.getPropertyValueList();
         if (!CollectionUtils.isEmpty(propertyValueList)) {
+            for (PlatformPropertyValue platformPropertyValue : propertyValueList) {
+                platformPropertyValue.setPropertyKeyId(propertyKeyId);
+            }
             propertyValueService.saveBatch(propertyValueList);
         }
     }
