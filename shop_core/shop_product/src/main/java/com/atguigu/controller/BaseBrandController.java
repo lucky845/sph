@@ -48,7 +48,19 @@ public class BaseBrandController {
         return RetVal.ok(page);
     }
 
-
+    /**
+     * 添加品牌信息
+     *
+     * @param baseBrand 品牌信息对象
+     */
+    @ApiOperation("添加品牌信息")
+    private RetVal<Object> saveBrand(
+            @ApiParam(name = "baseBrand", value = "品牌信息对象", required = true)
+            @RequestBody BaseBrand baseBrand
+    ) {
+        baseBrandService.save(baseBrand);
+        return RetVal.ok();
+    }
 
 
 }
