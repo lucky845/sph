@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
-import java.io.File;
 import java.io.InputStream;
 import java.util.UUID;
 
@@ -57,9 +56,8 @@ public class MinioUpload {
         PutObjectOptions putObjectOptions = new PutObjectOptions(inputStream.available(), -1);
         minioClient.putObject(minioProperties.getBucketName(), filename, inputStream, putObjectOptions);
         // 拼接文件地址
-        String retUrl = minioProperties.getEndpoint() + File.separator
-                + minioProperties.getBucketName() + File.separator + filename;
-        return retUrl;
+        return minioProperties.getEndpoint() + "/"
+                + minioProperties.getBucketName() + "/" + filename;
     }
 
 }
