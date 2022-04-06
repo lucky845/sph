@@ -20,6 +20,13 @@
     <!--添加的分布式文件系统jar-->
     <dependencies>
 
+        <!--minio实现文件上传-->
+        <dependency>
+            <groupId>io.minio</groupId>
+            <artifactId>minio</artifactId>
+            <version>7.0.2</version>
+        </dependency>
+
         <dependency>
             <groupId>net.oschina.zcx7878</groupId>
             <artifactId>fastdfs-client-java</artifactId>

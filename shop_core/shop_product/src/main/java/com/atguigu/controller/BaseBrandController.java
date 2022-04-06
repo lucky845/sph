@@ -4,22 +4,17 @@ package com.atguigu.controller;
 import com.atguigu.entity.BaseBrand;
 import com.atguigu.result.RetVal;
 import com.atguigu.service.BaseBrandService;
+import com.atguigu.utils.MinioUpload;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.apache.commons.io.FilenameUtils;
-import org.csource.fastdfs.ClientGlobal;
-import org.csource.fastdfs.StorageClient1;
-import org.csource.fastdfs.TrackerClient;
-import org.csource.fastdfs.TrackerServer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.Resource;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * <p>
@@ -39,6 +34,9 @@ public class BaseBrandController {
 
     @Value("${fastdfs.fix}")
     private String fastdfsfix;
+
+    @Resource
+    private MinioUpload minioUpload;
 
     /**
      * 查询品牌信息分页记录
@@ -131,33 +129,42 @@ public class BaseBrandController {
         return RetVal.ok(baseBrandList);
     }
 
+    /*
+        @ApiOperation("利用fastdfs进行文件上传")
+        @PostMapping("/fileUpload")
+        public RetVal<String> fileUpload(
+                @ApiParam(name = "file", value = "需要上传的文件", required = true)
+                        MultipartFile file
+        ) throws Exception {
+            // 需要一个配制文件告诉fastdfs在哪里
+            String configFilePath = Objects.requireNonNull(this.getClass().getResource("/tracker.conf")).getFile();
+            // 初始化
+            ClientGlobal.init(configFilePath);
+            // 创建trackerClient客户端
+            TrackerClient trackerClient = new TrackerClient();
+            // 用trackerClient获取连接
+            TrackerServer trackerServer = trackerClient.getConnection();
+            // 创建StorageClient1
+            StorageClient1 storageClient1 = new StorageClient1(trackerServer, null);
+            // 对文件实现上传
+            String originalFilename = file.getOriginalFilename();
+            String extension = FilenameUtils.getExtension(originalFilename);
+            String path = storageClient1.upload_file1(file.getBytes(), extension, null);
+            System.out.println("文件访问地址： " + fastdfsfix + path);
+            return RetVal.ok(fastdfsfix + path);
+        }
+    */
+
     /**
-     * 利用fastdfs进行文件上传
+     * 使用minio进行文件上传
      *
      * @param file 需要上传的文件
      */
-    @ApiOperation("利用fastdfs进行文件上传")
+    @ApiOperation("利用minio进行文件上传")
     @PostMapping("/fileUpload")
-    public RetVal<String> fileUpload(
-            @ApiParam(name = "file", value = "需要上传的文件", required = true)
-                    MultipartFile file
-    ) throws Exception {
-        // 需要一个配制文件告诉fastdfs在哪里
-        String configFilePath = Objects.requireNonNull(this.getClass().getResource("/tracker.conf")).getFile();
-        // 初始化
-        ClientGlobal.init(configFilePath);
-        // 创建trackerClient客户端
-        TrackerClient trackerClient = new TrackerClient();
-        // 用trackerClient获取连接
-        TrackerServer trackerServer = trackerClient.getConnection();
-        // 创建StorageClient1
-        StorageClient1 storageClient1 = new StorageClient1(trackerServer, null);
-        // 对文件实现上传
-        String originalFilename = file.getOriginalFilename();
-        String extension = FilenameUtils.getExtension(originalFilename);
-        String path = storageClient1.upload_file1(file.getBytes(), extension, null);
-        System.out.println("文件访问地址： " + fastdfsfix + path);
-        return RetVal.ok(fastdfsfix + path);
+    public RetVal<String> fileUpload(MultipartFile file) throws Exception {
+        String path = minioUpload.uploadFile(file);
+        return RetVal.ok(path);
     }
 
 }
