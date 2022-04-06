@@ -2,4 +2,24 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.atguigu.mapper.ProductSalePropertyKeyMapper">
 
+    <resultMap id="salePropertyMap" type="com.atguigu.entity.ProductSalePropertyKey" autoMapping="true">
+        <id property="id" column="id"/>
+        <collection property="salePropertyValueList" ofType="com.atguigu.entity.ProductSalePropertyValue"
+                    autoMapping="true">
+            <id property="id" column="sale_property_value_id"/>
+        </collection>
+    </resultMap>
+    <select id="querySalePropertyByProductId" resultMap="salePropertyMap">
+        select a.id,
+               a.product_id,
+               a.sale_property_key_id,
+               a.sale_property_key_name,
+               b.id sale_property_value_id,
+               b.sale_property_value_name
+        from product_sale_property_key as a
+                 inner join product_sale_property_value as b
+                            on a.product_id = b.product_id
+                                and a.sale_property_key_id = b.sale_property_key_id
+        where a.product_id = #{spuId}
+    </select>
 </mapper>
