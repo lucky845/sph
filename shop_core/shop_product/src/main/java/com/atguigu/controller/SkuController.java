@@ -9,6 +9,7 @@ import com.atguigu.service.ProductImageService;
 import com.atguigu.service.ProductSalePropertyKeyService;
 import com.atguigu.service.SkuInfoService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -84,6 +85,26 @@ public class SkuController {
     ) {
         skuInfoService.saveSkuInfo(skuInfo);
         return RetVal.ok();
+    }
+
+    /**
+     * 查询SKU信息分页记录
+     *
+     * @param currentPageNum 当前页码
+     * @param pageSize       每页记录数
+     */
+    @ApiOperation("查询SKU信息分页记录")
+    @GetMapping("/querySkuInfoByPage/{currentPageNum}/{pageSize}")
+    public RetVal<Page<SkuInfo>> querySkuInfoByPage(
+            @ApiParam(name = "currentPageNum", value = "当前页码", required = true)
+            @PathVariable Long currentPageNum,
+
+            @ApiParam(name = "pageSize", value = "每页记录数", required = true)
+            @PathVariable Long pageSize
+    ) {
+        Page<SkuInfo> page = new Page<>(currentPageNum, pageSize);
+        skuInfoService.page(page, null);
+        return RetVal.ok(page);
     }
 
 }
