@@ -13,4 +13,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface ProductSpuService extends IService<ProductSpu> {
 
+    /**
+     * 保存商品SPU信息
+     *
+     * @param productSpu 商品SPU对象
+     */
+    void saveProductSpu(ProductSpu productSpu);
 }

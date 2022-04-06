@@ -15,10 +15,7 @@ import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -76,6 +73,21 @@ public class SpuController {
     public RetVal<List<BaseSaleProperty>> queryAllSaleProperty() {
         List<BaseSaleProperty> salePropertyList = salePropertyService.list(null);
         return RetVal.ok(salePropertyList);
+    }
+
+    /**
+     * 保存商品SPU信息
+     *
+     * @param productSpu 商品SPU对象
+     */
+    @ApiOperation("保存商品SPU信息")
+    @PostMapping("/saveProductSpu")
+    public RetVal<Object> saveProductSpu(
+            @ApiParam(name = "productSpu", value = "商品SPU对象", required = true)
+            @RequestBody ProductSpu productSpu
+    ) {
+        spuService.saveProductSpu(productSpu);
+        return RetVal.ok();
     }
 
 }
