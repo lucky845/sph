@@ -23,3 +23,7 @@ spring:
           uri: lb://shop-product
           predicates:
             - Path=/product/** # 路径匹配
+        - id: shop-web
+          uri: lb://shop-web
+          predicates:
+            - Host=item.gmall.com
