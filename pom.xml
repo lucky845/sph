@@ -14,8 +14,9 @@
         <module>shop_core</module>
         <module>shop_mbg</module>
         <module>shop_gateway</module>
-        <module>shop-web</module>
         <module>shop_web</module>
+        <module>shop_web</module>
+        <module>shop_feign_client</module>
     </modules>
 
     <!--引入spring boot 版本依赖-->
