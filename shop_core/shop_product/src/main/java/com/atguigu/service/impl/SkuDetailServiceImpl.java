@@ -1,7 +1,9 @@
 package com.atguigu.service.impl;
 
+import com.atguigu.entity.ProductSalePropertyKey;
 import com.atguigu.entity.SkuImage;
 import com.atguigu.entity.SkuInfo;
+import com.atguigu.mapper.ProductSalePropertyKeyMapper;
 import com.atguigu.service.SkuDetailService;
 import com.atguigu.service.SkuImageService;
 import com.atguigu.service.SkuInfoService;
@@ -24,6 +26,9 @@ public class SkuDetailServiceImpl implements SkuDetailService {
     @Resource
     private SkuImageService skuImageService;
 
+    @Resource
+    private ProductSalePropertyKeyMapper salePropertyKeyMapper;
+
     /**
      * 根据skuId查询商品基本信息
      *
@@ -41,5 +46,16 @@ public class SkuDetailServiceImpl implements SkuDetailService {
             skuInfo.setSkuImageList(skuImageList);
         }
         return skuInfo;
+    }
+
+    /**
+     * 获取该sku对应的销售属性(只有一份)和spu所有的销售属性(全份)
+     *
+     * @param productId 商品Id
+     * @param skuId     商品skuId
+     */
+    @Override
+    public List<ProductSalePropertyKey> getSpuSalePropertyAndSelected(Long productId, Long skuId) {
+        return salePropertyKeyMapper.getSpuSalePropertyAndSelected(productId, skuId);
     }
 }

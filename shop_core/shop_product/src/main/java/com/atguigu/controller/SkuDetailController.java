@@ -1,6 +1,7 @@
 package com.atguigu.controller;
 
 import com.atguigu.entity.BaseCategoryView;
+import com.atguigu.entity.ProductSalePropertyKey;
 import com.atguigu.entity.SkuInfo;
 import com.atguigu.service.BaseCategoryViewService;
 import com.atguigu.service.SkuDetailService;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * @author lucky845
@@ -77,7 +79,23 @@ public class SkuDetailController {
         return skuInfo.getPrice();
     }
 
-    // 获取该sku对应的销售属性(只有一份)和spu所有的销售属性(全份)
+    /**
+     * 获取该sku对应的销售属性(只有一份)和spu所有的销售属性(全份)
+     *
+     * @param productId 商品Id
+     * @param skuId     商品skuId
+     */
+    @ApiOperation("获取该sku对应的销售属性(只有一份)和spu所有的销售属性(全份)")
+    @GetMapping("/getSpuSalePropertyAndSelected/{productId}/{skuId}")
+    public List<ProductSalePropertyKey> getSpuSalePropertyAndSelected(
+            @ApiParam(name = "productId", value = "商品Id", required = true)
+            @PathVariable Long productId,
+
+            @ApiParam(name = "skuId", value = "商品skuId", required = true)
+            @PathVariable Long skuId
+    ) {
+        return skuDetailService.getSpuSalePropertyAndSelected(productId, skuId);
+    }
 
     // 获取skuId与销售属性组合的一个映射关系
 
