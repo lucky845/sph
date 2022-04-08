@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
+import java.math.BigDecimal;
 
 /**
  * @author lucky845
@@ -61,7 +62,20 @@ public class SkuDetailController {
         return categoryViewService.getById(category3Id);
     }
 
-    // 根据skuId查询商品实时价格
+    /**
+     * 根据skuId查询商品实时价格
+     *
+     * @param skuId 商品skuId
+     */
+    @ApiOperation("根据skuId查询商品实时价格")
+    @GetMapping("/getSkuPrice/{skuId}")
+    public BigDecimal getSkuPrice(
+            @ApiParam(name = "skuId", value = "商品skuId", required = true)
+            @PathVariable Long skuId
+    ) {
+        SkuInfo skuInfo = skuInfoService.getById(skuId);
+        return skuInfo.getPrice();
+    }
 
     // 获取该sku对应的销售属性(只有一份)和spu所有的销售属性(全份)
 
