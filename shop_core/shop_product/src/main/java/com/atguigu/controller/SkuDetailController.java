@@ -3,6 +3,7 @@ package com.atguigu.controller;
 import com.atguigu.entity.BaseCategoryView;
 import com.atguigu.entity.ProductSalePropertyKey;
 import com.atguigu.entity.SkuInfo;
+import com.atguigu.mapper.SkuSalePropertyValueMapper;
 import com.atguigu.service.BaseCategoryViewService;
 import com.atguigu.service.SkuDetailService;
 import com.atguigu.service.SkuInfoService;
@@ -16,7 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lucky845
@@ -35,6 +38,9 @@ public class SkuDetailController {
 
     @Resource
     private SkuInfoService skuInfoService;
+
+    @Resource
+    private SkuSalePropertyValueMapper skuSalePropertyValueMapper;
 
     /**
      * 根据skuId查询商品基本信息
@@ -97,7 +103,24 @@ public class SkuDetailController {
         return skuDetailService.getSpuSalePropertyAndSelected(productId, skuId);
     }
 
-    // 获取skuId与销售属性组合的一个映射关系
+    /**
+     * 获取skuId与销售属性组合的一个映射关系
+     *
+     * @param productId 商品Id
+     */
+    @ApiOperation("获取skuId与销售属性组合的一个映射关系")
+    @GetMapping("/getSalePropertyAndSkuIdMapping/{productId}")
+    public Map<Object, Object> getSalePropertyAndSkuIdMapping(
+            @ApiParam(name = "productId", value = "商品Id", required = true)
+            @PathVariable Long productId
+    ) {
+        HashMap<Object, Object> salePropertyAndSkuId = new HashMap<>();
+        List<Map<Object, Object>> retMapList = skuSalePropertyValueMapper.getSalePropertyAndSkuIdMapping(productId);
+        for (Map<Object, Object> map : retMapList) {
+            salePropertyAndSkuId.put(map.get("sale_property_value_id"), map.get("sku_id"));
+        }
+        return salePropertyAndSkuId;
+    }
 
 
 }
