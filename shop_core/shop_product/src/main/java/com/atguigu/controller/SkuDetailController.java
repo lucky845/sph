@@ -1,6 +1,8 @@
 package com.atguigu.controller;
 
+import com.atguigu.entity.BaseCategoryView;
 import com.atguigu.entity.SkuInfo;
+import com.atguigu.service.BaseCategoryViewService;
 import com.atguigu.service.SkuDetailService;
 import com.atguigu.service.SkuInfoService;
 import io.swagger.annotations.Api;
@@ -26,6 +28,9 @@ public class SkuDetailController {
     private SkuDetailService skuDetailService;
 
     @Resource
+    private BaseCategoryViewService categoryViewService;
+
+    @Resource
     private SkuInfoService skuInfoService;
 
     /**
@@ -42,7 +47,19 @@ public class SkuDetailController {
         return skuDetailService.getSkuInfo(skuId);
     }
 
-    // 根据商品三级分类id查询商品分类信息
+    /**
+     * 根据商品三级分类id查询商品分类信息
+     *
+     * @param category3Id 商品三级分类id
+     */
+    @ApiOperation("根据三级分类id查询商品分类信息")
+    @GetMapping("/getCategoryView/{category3Id}")
+    public BaseCategoryView getCategoryView(
+            @ApiParam(name = "category3Id", value = "商品三级分类id", required = true)
+            @PathVariable Long category3Id
+    ) {
+        return categoryViewService.getById(category3Id);
+    }
 
     // 根据skuId查询商品实时价格
 
