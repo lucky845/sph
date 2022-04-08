@@ -54,13 +54,13 @@ public class WebDetailController {
         // 5.获取skuId与销售属性组合的一个映射关系
         Map<Object, Object> salePropertyValueIdJson = productFeignClient.getSalePropertyAndSkuIdMapping(productId);
         // 填充参数
-        Map<String, Object> retMap = new HashMap<>();
-        retMap.put("skuInfo", skuInfo);
-        retMap.put("price", skuPrice);
-        retMap.put("categoryView", categoryView);
-        retMap.put("spuSalePropertyList", spuSalePropertyList);
-        retMap.put("salePropertyValueIdJson", JSON.toJSONString(salePropertyValueIdJson));
-        model.addAllAttributes(retMap);
+        Map<String, Object> dataMap = new HashMap<>();
+        dataMap.put("skuInfo", skuInfo);
+        dataMap.put("price", skuPrice);
+        dataMap.put("categoryView", categoryView);
+        dataMap.put("spuSalePropertyList", spuSalePropertyList);
+        dataMap.put("salePropertyValueIdJson", JSON.toJSONString(salePropertyValueIdJson));
+        model.addAllAttributes(dataMap);
         return "detail/index";
     }
 }
