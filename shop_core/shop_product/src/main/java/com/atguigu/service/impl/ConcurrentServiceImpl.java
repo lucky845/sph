@@ -3,10 +3,12 @@ package com.atguigu.service.impl;
 import com.atguigu.service.ConcurrentService;
 import com.atguigu.utils.SleepUtils;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.util.Collections;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -94,8 +96,7 @@ public class ConcurrentServiceImpl implements ConcurrentService {
      * 问题: 判断和删除是两个操作，不满足原子性，可能会出现数据错误
      * 解决方法: 使用lua脚本，实现原子性操作
      */
-    @Override
-    public void setNum() {
+    public void setNum5() {
         // 放一个锁的标记
         String token = UUID.randomUUID().toString();
         // 使用Redis的setnx命令,设置一个超时时间，3秒后自动释放锁
@@ -110,6 +111,37 @@ public class ConcurrentServiceImpl implements ConcurrentService {
                 // 业务结束，释放锁
                 redisTemplate.delete("lock");
             }
+        } else {
+            // 如果没有拿到锁，就递归
+            setNum5();
+        }
+    }
+
+    /**
+     * 6. 测试分布式锁: 使用lua脚本，实现原子性操作
+     * 问题: 会出现栈溢出异常,引起结果不准确
+     *      性能问题-->假若在拿锁的时候还有很多操作,因为递归,那么每次就会执行多次
+     * 解决方法: 设置 栈空间的大小 -Xss15M   使用自旋,只去获取锁
+     */
+    @Override
+    public void setNum() {
+        // 放一个锁的标记
+        String token = UUID.randomUUID().toString();
+        // 使用Redis的setnx命令,设置一个超时时间，3秒后自动释放锁
+        boolean acquireLock = redisTemplate.opsForValue().setIfAbsent("lock", token, 3, TimeUnit.SECONDS);
+        if (acquireLock) {
+            // 拿到锁
+            doBusiness();
+            // 从redis获取标记
+            // 使用lua脚本,实现原子性操作,判断是否是自己的锁,并删除锁
+            String luaScript = "if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end";
+            DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+            // 把脚本封装到redisScript
+            redisScript.setScriptText(luaScript);
+            // 设置执行完成之后返回上面类型的数据
+            redisScript.setResultType(Long.class);
+            // 准备执行脚本 public <T> T execute(RedisScript<T> script, List<K> keys, Object... args)
+            redisTemplate.execute(redisScript, Collections.singletonList("lock"), token);
         } else {
             // 如果没有拿到锁，就递归
             setNum();
