@@ -146,7 +146,7 @@ public class SkuDetailController {
      * @param skuId 商品skuId
      */
     private SkuInfo getSkuInfoFromDB(Long skuId) {
-        return skuDetailService.getSkuInfo(skuId);
+        return skuDetailService.getSkuInfoFromDB(skuId);
     }
 
     /**

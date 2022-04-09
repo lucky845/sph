@@ -35,7 +35,7 @@ public class SkuDetailServiceImpl implements SkuDetailService {
      * @param skuId 商品skuId
      */
     @Override
-    public SkuInfo getSkuInfo(Long skuId) {
+    public SkuInfo getSkuInfoFromDB(Long skuId) {
         // 1. 查询商品的基本信息
         SkuInfo skuInfo = skuInfoService.getById(skuId);
         // 2. 查询商品的图片信息
