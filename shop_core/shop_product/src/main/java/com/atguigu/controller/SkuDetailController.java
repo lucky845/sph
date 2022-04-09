@@ -67,7 +67,7 @@ public class SkuDetailController {
         if (skuInfoFromRedis == null) {
             // 从数据库查询数据
             SkuInfo skuInfoFromDB = getSkuInfoFromDB(skuId);
-            // 将数放入缓存
+            // 将数据放入缓存
             redisTemplate.opsForValue().set(cacheKey, skuInfoFromDB, RedisConst.SKUKEY_TIMEOUT, TimeUnit.SECONDS);
             return skuInfoFromDB;
         }
