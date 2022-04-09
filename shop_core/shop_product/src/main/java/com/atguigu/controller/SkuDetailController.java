@@ -46,7 +46,7 @@ public class SkuDetailController {
     private SkuSalePropertyValueMapper skuSalePropertyValueMapper;
 
     @Resource
-    private RedisTemplate<Object,Object> redisTemplate;
+    private RedisTemplate<Object, Object> redisTemplate;
 
     /**
      * 根据skuId查询商品基本信息
@@ -59,6 +59,15 @@ public class SkuDetailController {
             @ApiParam(name = "skuId", value = "商品skuId", required = true)
             @PathVariable Long skuId
     ) {
+        return getSkuInfoFromRedis(skuId);
+    }
+
+    /**
+     * 从Redis获取数据(添加Redis缓存)
+     *
+     * @param skuId 商品skuId
+     */
+    private SkuInfo getSkuInfoFromRedis(@PathVariable @ApiParam(name = "skuId", value = "商品skuId", required = true) Long skuId) {
         // 缓存key
         String cacheKey = RedisConst.SKUKEY_PREFIX + skuId + RedisConst.SKUKEY_SUFFIX;
         // 从缓存获取数据
