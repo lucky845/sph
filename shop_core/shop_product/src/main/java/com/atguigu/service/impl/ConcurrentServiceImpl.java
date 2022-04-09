@@ -1,11 +1,13 @@
 package com.atguigu.service.impl;
 
 import com.atguigu.service.ConcurrentService;
+import com.atguigu.utils.SleepUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author lucky845
@@ -48,12 +50,11 @@ public class ConcurrentServiceImpl implements ConcurrentService {
     }
 
     /**
-     * 3. 测试分布式锁
+     * 3. 测试分布式锁: 使用Redis的setnx命令
      * 问题: 使用Redis的setnx命令,如果doBusiness()出现异常，锁会一直占用，无法释放
      * 解决方法: 设置一个超时时间，超时后自动释放锁
      */
-    @Override
-    public void setNum() {
+    public void setNum3() {
         boolean acquireLock = redisTemplate.opsForValue().setIfAbsent("lock", "ok");
         if (acquireLock) {
             // 拿到锁
@@ -62,7 +63,27 @@ public class ConcurrentServiceImpl implements ConcurrentService {
             redisTemplate.delete("lock");
         } else {
             // 如果没有拿到锁，就递归
-            setNum();
+            setNum3();
+        }
+    }
+
+    /**
+     * 4. 测试分布式锁: 设置一个超时时间，超时后自动释放锁
+     * 问题: 多线程操作，因为业务时间和超时时间不一致，可能会释放其他线程的锁，导致数据错误
+     * 解决方法: 添加一个标记，释放前先判断是否是自己的锁
+     */
+    @Override
+    public void setNum() {
+        boolean acquireLock = redisTemplate.opsForValue().setIfAbsent("lock", "ok",3, TimeUnit.SECONDS);
+        if (acquireLock) {
+            // 拿到锁
+            doBusiness();
+            SleepUtils.sleep(5);
+            // 业务结束，释放锁
+            redisTemplate.delete("lock");
+        } else {
+            // 如果没有拿到锁，就递归
+            setNum3();
         }
     }
 }
