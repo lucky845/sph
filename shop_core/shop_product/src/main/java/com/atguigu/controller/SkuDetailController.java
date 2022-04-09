@@ -1,5 +1,6 @@
 package com.atguigu.controller;
 
+import com.atguigu.constant.RedisConst;
 import com.atguigu.entity.BaseCategoryView;
 import com.atguigu.entity.ProductSalePropertyKey;
 import com.atguigu.entity.SkuInfo;
@@ -10,6 +11,7 @@ import com.atguigu.service.SkuInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +22,7 @@ import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author lucky845
@@ -42,6 +45,9 @@ public class SkuDetailController {
     @Resource
     private SkuSalePropertyValueMapper skuSalePropertyValueMapper;
 
+    @Resource
+    private RedisTemplate redisTemplate;
+
     /**
      * 根据skuId查询商品基本信息
      *
@@ -53,6 +59,27 @@ public class SkuDetailController {
             @ApiParam(name = "skuId", value = "商品skuId", required = true)
             @PathVariable Long skuId
     ) {
+        // 缓存key
+        String cacheKey = RedisConst.SKUKEY_PREFIX + skuId + RedisConst.SKUKEY_SUFFIX;
+        // 从缓存获取数据
+        SkuInfo skuInfoFromRedis = (SkuInfo) redisTemplate.opsForValue().get(cacheKey);
+        // 如果数据库中没有缓存
+        if (skuInfoFromRedis == null) {
+            // 从数据库查询数据
+            SkuInfo skuInfoFromDB = getSkuInfoFromDB(skuId);
+            // 将数放入缓存
+            redisTemplate.opsForValue().set(cacheKey, skuInfoFromDB, RedisConst.SKUKEY_TIMEOUT, TimeUnit.SECONDS);
+            return skuInfoFromDB;
+        }
+        return skuInfoFromRedis;
+    }
+
+    /**
+     * 从数据库获取数据
+     *
+     * @param skuId 商品skuId
+     */
+    private SkuInfo getSkuInfoFromDB(@PathVariable @ApiParam(name = "skuId", value = "商品skuId", required = true) Long skuId) {
         return skuDetailService.getSkuInfo(skuId);
     }
 
