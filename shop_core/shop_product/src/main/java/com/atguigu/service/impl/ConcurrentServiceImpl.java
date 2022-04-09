@@ -41,10 +41,28 @@ public class ConcurrentServiceImpl implements ConcurrentService {
     /**
      * 2. 测试分布式锁: 在单台服务器的情况下，数据加锁成功，数据未出现异常
      * 问题: 使用idea配置两个微服务,这样就有两个JVM，导致加锁对象不是同一个，出现数据异常
-     * 解决方法:
+     * 解决方法: 使用Redis的setnx命令-->set if not exists
+     */
+    public synchronized void setNum2() {
+        doBusiness();
+    }
+
+    /**
+     * 3. 测试分布式锁
+     * 问题: 使用Redis的setnx命令,如果doBusiness()出现异常，锁会一直占用，无法释放
+     * 解决方法: 设置一个超时时间，超时后自动释放锁
      */
     @Override
-    public synchronized void setNum() {
-        doBusiness();
+    public void setNum() {
+        boolean acquireLock = redisTemplate.opsForValue().setIfAbsent("lock", "ok");
+        if (acquireLock) {
+            // 拿到锁
+            doBusiness();
+            // 业务结束，释放锁
+            redisTemplate.delete("lock");
+        } else {
+            // 如果没有拿到锁，就递归
+            setNum();
+        }
     }
 }
