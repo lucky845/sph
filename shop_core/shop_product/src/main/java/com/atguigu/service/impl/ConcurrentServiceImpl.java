@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -72,18 +73,46 @@ public class ConcurrentServiceImpl implements ConcurrentService {
      * 问题: 多线程操作，因为业务时间和超时时间不一致，可能会释放其他线程的锁，导致数据错误
      * 解决方法: 添加一个标记，释放前先判断是否是自己的锁
      */
-    @Override
-    public void setNum() {
-        boolean acquireLock = redisTemplate.opsForValue().setIfAbsent("lock", "ok",3, TimeUnit.SECONDS);
+    public void setNum4() {
+        // 使用Redis的setnx命令,设置一个超时时间，3秒后自动释放锁
+        boolean acquireLock = redisTemplate.opsForValue().setIfAbsent("lock", "ok", 3, TimeUnit.SECONDS);
         if (acquireLock) {
             // 拿到锁
             doBusiness();
+            // 业务执行5秒
             SleepUtils.sleep(5);
             // 业务结束，释放锁
             redisTemplate.delete("lock");
         } else {
             // 如果没有拿到锁，就递归
-            setNum3();
+            setNum4();
+        }
+    }
+
+    /**
+     * 5. 测试分布式锁: 添加一个标记，释放前先判断是否是自己的锁
+     * 问题: 判断和删除是两个操作，不满足原子性，可能会出现数据错误
+     * 解决方法: 使用lua脚本，实现原子性操作
+     */
+    @Override
+    public void setNum() {
+        // 放一个锁的标记
+        String token = UUID.randomUUID().toString();
+        // 使用Redis的setnx命令,设置一个超时时间，3秒后自动释放锁
+        boolean acquireLock = redisTemplate.opsForValue().setIfAbsent("lock", token, 3, TimeUnit.SECONDS);
+        if (acquireLock) {
+            // 拿到锁
+            doBusiness();
+            // 从redis获取标记
+            String redisToken = (String) redisTemplate.opsForValue().get("lock");
+            // 判断是否是自己的锁
+            if (token.equals(redisToken)) {
+                // 业务结束，释放锁
+                redisTemplate.delete("lock");
+            }
+        } else {
+            // 如果没有拿到锁，就递归
+            setNum();
         }
     }
 }
