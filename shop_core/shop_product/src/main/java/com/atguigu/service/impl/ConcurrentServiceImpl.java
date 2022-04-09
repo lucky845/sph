@@ -235,8 +235,7 @@ public class ConcurrentServiceImpl implements ConcurrentService {
      * 9. 测试分布式锁: 将mao的值设置为token，因为token有超时时间，会自动删除
      * 优化: 使用ThreadLocal
      */
-    @Override
-    public void setNum() {
+    public void setNum9() {
         // 获取锁之前还有100行代码.....
         // 从map中获取锁的标记
         String token = threadMapToken.get(Thread.currentThread());
@@ -255,7 +254,7 @@ public class ConcurrentServiceImpl implements ConcurrentService {
             doBusiness();
             luaBusiness(token);
             // 移除锁标记，防止内存溢出
-            threadMap.remove(Thread.currentThread());
+            threadMapToken.remove(Thread.currentThread());
         } else {
             // 自旋获取锁
             for (; ; ) {
@@ -264,6 +263,48 @@ public class ConcurrentServiceImpl implements ConcurrentService {
                 if (retryAcquireLock) {
                     // 拿到了锁，将锁标记到一个map中
                     threadMapToken.put(Thread.currentThread(), token);
+                    break;
+                }
+            }
+            // 如果没有拿到锁，就递归
+            setNum9();
+        }
+    }
+
+    private final ThreadLocal<String> threadLocal = new ThreadLocal<>();
+
+    /**
+     * 10. 测试分布式锁: 使用ThreadLocal
+     */
+    @Override
+    public void setNum() {
+        // 获取锁之前还有100行代码.....
+        // 从map中获取锁的标记
+        String token = threadLocal.get();
+        boolean acquireLock = false;
+        // 代表线程刚进来，还没有自旋过
+        if (token == null) {
+            // 放一个锁的标记
+            token = UUID.randomUUID().toString();
+            acquireLock = redisTemplate.opsForValue().setIfAbsent("lock", token, 30, TimeUnit.MINUTES);
+        } else {
+            // 已经进来过了，一定是自旋获取到了锁
+            acquireLock = true;
+        }
+        // 判断是否获取到锁
+        if (acquireLock) {
+            doBusiness();
+            luaBusiness(token);
+            // 移除锁标记，防止内存溢出
+            threadLocal.remove();
+        } else {
+            // 自旋获取锁
+            for (; ; ) {
+                SleepUtils.sleepMillis(50);
+                boolean retryAcquireLock = redisTemplate.opsForValue().setIfAbsent("lock", token, 30, TimeUnit.MINUTES);
+                if (retryAcquireLock) {
+                    // 拿到了锁，将锁标记到一个map中
+                    threadLocal.set(token);
                     break;
                 }
             }
