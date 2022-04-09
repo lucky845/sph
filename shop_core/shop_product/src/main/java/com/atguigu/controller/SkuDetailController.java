@@ -12,6 +12,7 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,9 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -48,6 +47,8 @@ public class SkuDetailController {
     @Resource
     private RedisTemplate<Object, Object> redisTemplate;
 
+    private final ThreadLocal<String> threadLocal = new ThreadLocal<>();
+
     /**
      * 根据skuId查询商品基本信息
      *
@@ -59,7 +60,61 @@ public class SkuDetailController {
             @ApiParam(name = "skuId", value = "商品skuId", required = true)
             @PathVariable Long skuId
     ) {
-        return getSkuInfoFromRedis(skuId);
+        return getSkuInfoFromRedisWithThreadLocal(skuId);
+    }
+
+    /**
+     * 利用Redis+Lua+ThreadLocal实现查询商品的基本信息
+     *
+     * @param skuId 商品skuId
+     */
+    private SkuInfo getSkuInfoFromRedisWithThreadLocal(Long skuId) {
+        String cacheKey = RedisConst.SKUKEY_PREFIX + skuId + RedisConst.SKUKEY_SUFFIX;
+        // 从缓存中获取数据
+        SkuInfo redisSkuInfo = (SkuInfo) redisTemplate.opsForValue().get(cacheKey);
+        // 如果缓存中没有数据，则从数据库中获取
+        if (redisSkuInfo == null) {
+            String token = threadLocal.get();
+            boolean acquireLock = false;
+            // 让锁的粒度更小，提高效率
+            String localKey = "lock-" + skuId;
+            if (token == null) {
+                // 代表线程刚进来，还没有自旋过，需要获取锁
+                token = UUID.randomUUID().toString();
+                acquireLock = redisTemplate.opsForValue().setIfAbsent(localKey, token, 30, TimeUnit.MINUTES);
+            } else {
+                // 程序已经自旋过，已经获取到了锁
+                acquireLock = true;
+            }
+            if (acquireLock) {
+                SkuInfo skuInfoFromDb = getSkuInfoFromRedis(skuId);
+                String luaScript = "if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end";
+                DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+                redisScript.setScriptText(luaScript);
+                redisScript.setResultType(Long.class);
+                redisTemplate.execute(redisScript, Collections.singletonList(localKey), token);
+                // 清除ThreadLocal中的数据，防止内存泄漏
+                threadLocal.remove();
+                // 返回数据库中的数据
+                return skuInfoFromDb;
+            } else {
+                // 自旋
+                for (; ; ) {
+                    // 尝试获取锁
+                    boolean retryAcquireLock = redisTemplate.opsForValue().setIfAbsent(localKey, token, 30, TimeUnit.MINUTES);
+                    if (retryAcquireLock) {
+                        // 拿到锁之后，就不需要自旋了，把拿到的锁的标记放到ThreadLocal中
+                        threadLocal.set(token);
+                        break;
+                    }
+                }
+                // 如果没有拿到锁，就递归
+                return getSkuInfoFromRedisWithThreadLocal(skuId);
+            }
+        } else {
+            // 返回缓存中的数据
+            return redisSkuInfo;
+        }
     }
 
     /**
@@ -67,7 +122,7 @@ public class SkuDetailController {
      *
      * @param skuId 商品skuId
      */
-    private SkuInfo getSkuInfoFromRedis(@PathVariable @ApiParam(name = "skuId", value = "商品skuId", required = true) Long skuId) {
+    private SkuInfo getSkuInfoFromRedis(Long skuId) {
         // 缓存key
         String cacheKey = RedisConst.SKUKEY_PREFIX + skuId + RedisConst.SKUKEY_SUFFIX;
         // 从缓存获取数据
@@ -88,7 +143,7 @@ public class SkuDetailController {
      *
      * @param skuId 商品skuId
      */
-    private SkuInfo getSkuInfoFromDB(@PathVariable @ApiParam(name = "skuId", value = "商品skuId", required = true) Long skuId) {
+    private SkuInfo getSkuInfoFromDB(Long skuId) {
         return skuDetailService.getSkuInfo(skuId);
     }
 
