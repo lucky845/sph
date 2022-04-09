@@ -46,7 +46,7 @@ public class SkuDetailController {
     private SkuSalePropertyValueMapper skuSalePropertyValueMapper;
 
     @Resource
-    private RedisTemplate redisTemplate;
+    private RedisTemplate<Object,Object> redisTemplate;
 
     /**
      * 根据skuId查询商品基本信息
