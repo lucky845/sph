@@ -120,11 +120,10 @@ public class ConcurrentServiceImpl implements ConcurrentService {
     /**
      * 6. 测试分布式锁: 使用lua脚本，实现原子性操作
      * 问题: 会出现栈溢出异常,引起结果不准确
-     *      性能问题-->假若在拿锁的时候还有很多操作,因为递归,那么每次就会执行多次
+     * 性能问题-->假若在拿锁的时候还有很多操作,因为递归,那么每次就会执行多次
      * 解决方法: 设置 栈空间的大小 -Xss15M   使用自旋,只去获取锁
      */
-    @Override
-    public void setNum() {
+    public void setNum6() {
         // 放一个锁的标记
         String token = UUID.randomUUID().toString();
         // 使用Redis的setnx命令,设置一个超时时间，3秒后自动释放锁
@@ -132,17 +131,53 @@ public class ConcurrentServiceImpl implements ConcurrentService {
         if (acquireLock) {
             // 拿到锁
             doBusiness();
-            // 从redis获取标记
-            // 使用lua脚本,实现原子性操作,判断是否是自己的锁,并删除锁
-            String luaScript = "if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end";
-            DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
-            // 把脚本封装到redisScript
-            redisScript.setScriptText(luaScript);
-            // 设置执行完成之后返回上面类型的数据
-            redisScript.setResultType(Long.class);
-            // 准备执行脚本 public <T> T execute(RedisScript<T> script, List<K> keys, Object... args)
-            redisTemplate.execute(redisScript, Collections.singletonList("lock"), token);
+            luaBusiness(token);
         } else {
+            // 如果没有拿到锁，就递归
+            setNum6();
+        }
+    }
+
+    /**
+     * lua脚本执行原子性操作，判断锁是否是自己的并删除锁
+     * @param token 锁的标记
+     */
+    private void luaBusiness(String token) {
+        // 使用lua脚本,实现原子性操作,判断是否是自己的锁,并删除锁
+        String luaScript = "if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end";
+        DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+        // 把脚本封装到redisScript
+        redisScript.setScriptText(luaScript);
+        // 设置执行完成之后返回上面类型的数据
+        redisScript.setResultType(Long.class);
+        // 准备执行脚本 public <T> T execute(RedisScript<T> script, List<K> keys, Object... args)
+        redisTemplate.execute(redisScript, Collections.singletonList("lock"), token);
+    }
+
+    /**
+     * 7. 测试分布式锁: 使用自旋，只去获取锁
+     * 问题: 出现死锁
+     * 解决方法: 告知已经获取到锁了
+     */
+    @Override
+    public void setNum() {
+        // 获取锁之前还有100行代码.....
+        // 放一个锁的标记
+        String token = UUID.randomUUID().toString();
+        boolean acquireLock = redisTemplate.opsForValue().setIfAbsent("lock", token, 30, TimeUnit.MINUTES);
+        if (acquireLock) {
+            doBusiness();
+            luaBusiness(token);
+        } else {
+            // 自旋获取锁
+            for (; ; ) {
+                SleepUtils.sleepMillis(50);
+                boolean retryAcquireLock = redisTemplate.opsForValue().setIfAbsent("lock", token, 30, TimeUnit.MINUTES);
+                if (retryAcquireLock) {
+                    // 拿到了锁
+                    break;
+                }
+            }
             // 如果没有拿到锁，就递归
             setNum();
         }
