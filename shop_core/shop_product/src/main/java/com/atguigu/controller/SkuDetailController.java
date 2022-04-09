@@ -71,9 +71,9 @@ public class SkuDetailController {
     private SkuInfo getSkuInfoFromRedisWithThreadLocal(Long skuId) {
         String cacheKey = RedisConst.SKUKEY_PREFIX + skuId + RedisConst.SKUKEY_SUFFIX;
         // 从缓存中获取数据
-        SkuInfo redisSkuInfo = (SkuInfo) redisTemplate.opsForValue().get(cacheKey);
+        SkuInfo skuInfoFromRedis = (SkuInfo) redisTemplate.opsForValue().get(cacheKey);
         // 如果缓存中没有数据，则从数据库中获取
-        if (redisSkuInfo == null) {
+        if (skuInfoFromRedis == null) {
             String token = threadLocal.get();
             boolean acquireLock = false;
             // 让锁的粒度更小，提高效率
@@ -87,7 +87,9 @@ public class SkuDetailController {
                 acquireLock = true;
             }
             if (acquireLock) {
-                SkuInfo skuInfoFromDb = getSkuInfoFromRedis(skuId);
+                SkuInfo skuInfoFromDB = getSkuInfoFromDB(skuId);
+                // 将数据放入Redis缓存
+                redisTemplate.opsForValue().set(cacheKey, skuInfoFromDB, RedisConst.SKUKEY_TIMEOUT, TimeUnit.SECONDS);
                 String luaScript = "if redis.call('get',KEYS[1]) == ARGV[1] then return redis.call('del',KEYS[1]) else return 0 end";
                 DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
                 redisScript.setScriptText(luaScript);
@@ -96,7 +98,7 @@ public class SkuDetailController {
                 // 清除ThreadLocal中的数据，防止内存泄漏
                 threadLocal.remove();
                 // 返回数据库中的数据
-                return skuInfoFromDb;
+                return skuInfoFromDB;
             } else {
                 // 自旋
                 for (; ; ) {
@@ -113,7 +115,7 @@ public class SkuDetailController {
             }
         } else {
             // 返回缓存中的数据
-            return redisSkuInfo;
+            return skuInfoFromRedis;
         }
     }
 
