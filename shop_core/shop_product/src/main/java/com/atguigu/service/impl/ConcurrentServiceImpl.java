@@ -9,6 +9,8 @@ import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
@@ -140,6 +142,7 @@ public class ConcurrentServiceImpl implements ConcurrentService {
 
     /**
      * lua脚本执行原子性操作，判断锁是否是自己的并删除锁
+     *
      * @param token 锁的标记
      */
     private void luaBusiness(String token) {
@@ -157,10 +160,9 @@ public class ConcurrentServiceImpl implements ConcurrentService {
     /**
      * 7. 测试分布式锁: 使用自旋，只去获取锁
      * 问题: 出现死锁
-     * 解决方法: 告知已经获取到锁了
+     * 解决方法: 告知已经获取到锁了,使用一个map存储状态(重入锁的设计)
      */
-    @Override
-    public void setNum() {
+    public void setNum7() {
         // 获取锁之前还有100行代码.....
         // 放一个锁的标记
         String token = UUID.randomUUID().toString();
@@ -175,6 +177,51 @@ public class ConcurrentServiceImpl implements ConcurrentService {
                 boolean retryAcquireLock = redisTemplate.opsForValue().setIfAbsent("lock", token, 30, TimeUnit.MINUTES);
                 if (retryAcquireLock) {
                     // 拿到了锁
+                    break;
+                }
+            }
+            // 如果没有拿到锁，就递归
+            setNum7();
+        }
+    }
+
+    private final Map<Thread, Boolean> threadMap = new HashMap<>();
+
+    /**
+     * 8. 测试分布式锁: 告知已经获取到锁了,使用一个map存储状态(重入锁的设计)
+     * 问题: local未删除
+     * 解决方法: 将mao的值设置为token，因为token有超时时间，会自动删除
+     */
+    @Override
+    public void setNum() {
+        // 获取锁之前还有100行代码.....
+        // 从map中获取锁的标记
+        Boolean flag = threadMap.get(Thread.currentThread());
+        String token = null;
+        boolean acquireLock = false;
+        // 代表线程刚进来，还没有自旋过
+        if (flag == null || !flag) {
+            // 放一个锁的标记
+            token = UUID.randomUUID().toString();
+            acquireLock = redisTemplate.opsForValue().setIfAbsent("lock", token, 30, TimeUnit.MINUTES);
+        } else {
+            // 已经进来过了，一定是自旋获取到了锁
+            acquireLock = true;
+        }
+        // 判断是否获取到锁
+        if (acquireLock) {
+            doBusiness();
+            luaBusiness(token);
+            // 移除锁标记，防止内存溢出
+            threadMap.remove(Thread.currentThread());
+        } else {
+            // 自旋获取锁
+            for (; ; ) {
+                SleepUtils.sleepMillis(50);
+                boolean retryAcquireLock = redisTemplate.opsForValue().setIfAbsent("lock", token, 30, TimeUnit.MINUTES);
+                if (retryAcquireLock) {
+                    // 拿到了锁，将锁标记到一个map中
+                    threadMap.put(Thread.currentThread(), true);
                     break;
                 }
             }
