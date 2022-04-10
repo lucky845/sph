@@ -11,6 +11,8 @@ import com.atguigu.service.SkuInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -47,6 +49,9 @@ public class SkuDetailController {
     @Resource
     private RedisTemplate<Object, Object> redisTemplate;
 
+    @Resource
+    private RedissonClient redissonClient;
+
     private final ThreadLocal<String> threadLocal = new ThreadLocal<>();
 
     /**
@@ -60,8 +65,42 @@ public class SkuDetailController {
             @ApiParam(name = "skuId", value = "商品skuId", required = true)
             @PathVariable Long skuId
     ) {
-        return getSkuInfoFromRedisWithThreadLocal(skuId);
+        return getSkuInfoFromRedisson(skuId);
     }
+
+    /**
+     * 利用Redisson实现查询商品的基本信息
+     *
+     * @param skuId 商品skuId
+     */
+    private SkuInfo getSkuInfoFromRedisson(Long skuId) {
+        String cacheKey = RedisConst.SKUKEY_PREFIX + skuId + RedisConst.SKUKEY_SUFFIX;
+        // 从缓存中获取数据
+        SkuInfo skuInfoFromRedis = (SkuInfo) redisTemplate.opsForValue().get(cacheKey);
+        // 如果缓存中没有数据，则从数据库中获取
+        if (skuInfoFromRedis == null) {
+            // 让锁的粒度更小，提高效率
+            String lockKey = "lock-" + skuId;
+            // 获取锁
+            RLock lock = redissonClient.getLock(lockKey);
+            // 上锁
+            lock.lock();
+            try {
+                // 从数据库获取数据
+                SkuInfo skuInfoFromDB = getSkuInfoFromDB(skuId);
+                // 将数据保存缓存
+                redisTemplate.opsForValue().set(cacheKey, skuInfoFromDB, RedisConst.SKUKEY_TIMEOUT, TimeUnit.SECONDS);
+                // 返回数据库中的数据
+                return skuInfoFromDB;
+            } finally {
+                // 释放锁
+                lock.unlock();
+            }
+        }
+        // 返回缓存中的数据
+        return skuInfoFromRedis;
+    }
+
 
     /**
      * 利用Redis+Lua+ThreadLocal实现查询商品的基本信息

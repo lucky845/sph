@@ -2,6 +2,7 @@ package com.atguigu.controller;
 
 import com.atguigu.utils.SleepUtils;
 import org.redisson.api.RLock;
+import org.redisson.api.RReadWriteLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -81,6 +82,47 @@ public class RedissonController {
             lock.unlock();
         }
         return Thread.currentThread().getName() + ":" + uuid;
+    }
+
+    private String message = "hello";
+
+    /**
+     * 测试写锁
+     */
+    @GetMapping("/write")
+    public String write() {
+        RReadWriteLock rwLock = redissonClient.getReadWriteLock("rwLock");
+        // 获取写锁
+        RLock writeLock = rwLock.writeLock();
+        try {
+            // 加锁
+            writeLock.lock();
+            message += UUID.randomUUID().toString();
+            System.out.println(Thread.currentThread().getName() + "执行业务");
+            SleepUtils.sleep(15);
+        } finally {
+            // 释放锁
+            writeLock.unlock();
+        }
+        return message;
+    }
+
+    /**
+     * 测试读锁
+     */
+    @GetMapping("/read")
+    public String read() {
+        RReadWriteLock rwLock = redissonClient.getReadWriteLock("rwLock");
+        // 获取读锁
+        RLock readLock = rwLock.readLock();
+        try {
+            // 加锁
+            readLock.lock();
+            return message;
+        } finally {
+            // 释放锁
+            readLock.unlock();
+        }
     }
 
 
