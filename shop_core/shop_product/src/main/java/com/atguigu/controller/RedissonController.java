@@ -1,9 +1,7 @@
 package com.atguigu.controller;
 
 import com.atguigu.utils.SleepUtils;
-import org.redisson.api.RLock;
-import org.redisson.api.RReadWriteLock;
-import org.redisson.api.RedissonClient;
+import org.redisson.api.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -125,5 +123,53 @@ public class RedissonController {
         }
     }
 
+    /**
+     * 测试Semaphore
+     * 停车场有五个车位
+     * 1. 占用车位
+     * 2. 离开车位
+     */
+    @GetMapping("/park")
+    public String park() throws Exception {
+        RSemaphore parkStation = redissonClient.getSemaphore("park");
+        // 停车信号量减一
+        parkStation.acquire(1);
+        System.out.println(Thread.currentThread().getName() + "进入车位");
+        return Thread.currentThread().getName() + "进入车位";
+    }
+
+    // 需要先调用left方法
+    @GetMapping("/left")
+    public String left() throws Exception {
+        RSemaphore parkStation = redissonClient.getSemaphore("park");
+        // 离开车位信号量加一
+        parkStation.release(1);
+        System.out.println(Thread.currentThread().getName() + "离开车位");
+        return Thread.currentThread().getName() + "离开车位";
+    }
+
+    /**
+     * 测试CountDownLatch
+     * 所有同学全部走完班长才能锁门
+     */
+    @GetMapping("/ready")
+    public String ready() {
+        RCountDownLatch leftClassroom = redissonClient.getCountDownLatch("left_classroom");
+        // 离开教室，数量减一
+        leftClassroom.countDown();
+        System.out.println(Thread.currentThread().getName() + "离开教室");
+        return Thread.currentThread().getName() + "离开教室";
+    }
+
+    @GetMapping("/lockDoor")
+    public String lockDoor() throws Exception {
+        RCountDownLatch leftClassroom = redissonClient.getCountDownLatch("left_classroom");
+        // 设置多少个人走了才锁门
+        leftClassroom.trySetCount(6);
+        // 离开教室，数量减一
+        leftClassroom.await();
+        System.out.println(Thread.currentThread().getName() + "班长锁门");
+        return Thread.currentThread().getName() + "班长锁门";
+    }
 
 }
