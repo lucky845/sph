@@ -64,4 +64,24 @@ public class RedissonController {
         return Thread.currentThread().getName() + ":" + uuid;
     }
 
+    /**
+     * 测试tryLock，10s以内尝试拿锁，如果能拿到锁，给锁的过期时间设置为35秒，一般不采用这种方法
+     */
+    @GetMapping("/tryLock")
+    public String tryLock() throws Exception {
+        RLock lock = redissonClient.getLock("lock");
+        // 10s以内尝试拿锁，如果能拿到锁，给锁的过期时间设置为35秒，一般不采用这种方法
+        lock.tryLock(10, 35, TimeUnit.SECONDS);
+        String uuid = UUID.randomUUID().toString();
+        try {
+            System.out.println(Thread.currentThread().getName() + "执行业务" + uuid);
+            SleepUtils.sleep(40);
+        } finally {
+            // 释放锁
+            lock.unlock();
+        }
+        return Thread.currentThread().getName() + ":" + uuid;
+    }
+
+
 }
