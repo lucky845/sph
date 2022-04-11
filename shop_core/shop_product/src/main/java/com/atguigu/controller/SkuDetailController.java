@@ -11,6 +11,7 @@ import com.atguigu.service.SkuInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.redisson.api.RBloomFilter;
 import org.redisson.api.RLock;
 import org.redisson.api.RedissonClient;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -52,6 +53,9 @@ public class SkuDetailController {
     @Resource
     private RedissonClient redissonClient;
 
+    @Resource
+    private RBloomFilter<Object> bloomFilter;
+
     private final ThreadLocal<String> threadLocal = new ThreadLocal<>();
 
     /**
@@ -69,7 +73,7 @@ public class SkuDetailController {
     }
 
     /**
-     * 利用Redisson实现查询商品的基本信息
+     * 利用Redisson实现查询商品的基本信息+布隆过滤器
      *
      * @param skuId 商品skuId
      */
@@ -86,12 +90,19 @@ public class SkuDetailController {
             // 上锁
             lock.lock();
             try {
-                // 从数据库获取数据
-                SkuInfo skuInfoFromDB = getSkuInfoFromDB(skuId);
-                // 将数据保存缓存
+                // 查询之前先进行判断，该id是否在布隆过滤器中存在
+                boolean flag = bloomFilter.contains(skuId);
+                SkuInfo skuInfoFromDB = null;
+                if (flag) {
+                    // 从数据库获取数据
+                    skuInfoFromDB = getSkuInfoFromDB(skuId);
+                }
+                // 将数据保存到Redis
                 redisTemplate.opsForValue().set(cacheKey, skuInfoFromDB, RedisConst.SKUKEY_TIMEOUT, TimeUnit.SECONDS);
                 // 返回数据库中的数据
                 return skuInfoFromDB;
+            } catch (Exception e) {
+                e.printStackTrace();
             } finally {
                 // 释放锁
                 lock.unlock();
