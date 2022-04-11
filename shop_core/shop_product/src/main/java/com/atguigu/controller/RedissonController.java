@@ -1,6 +1,6 @@
 package com.atguigu.controller;
 
-import com.atguigu.utils.SleepUtils;
+import com.atguigu.exception.SleepUtils;
 import org.redisson.api.*;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

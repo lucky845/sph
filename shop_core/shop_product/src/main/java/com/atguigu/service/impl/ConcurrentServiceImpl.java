@@ -1,7 +1,7 @@
 package com.atguigu.service.impl;
 
+import com.atguigu.exception.SleepUtils;
 import com.atguigu.service.ConcurrentService;
-import com.atguigu.utils.SleepUtils;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
