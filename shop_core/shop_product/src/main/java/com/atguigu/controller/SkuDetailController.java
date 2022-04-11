@@ -120,7 +120,7 @@ public class SkuDetailController {
             if (token == null) {
                 // 代表线程刚进来，还没有自旋过，需要获取锁
                 token = UUID.randomUUID().toString();
-                acquireLock = redisTemplate.opsForValue().setIfAbsent(lockKey, token, 30, TimeUnit.MINUTES);
+                acquireLock = redisTemplate.opsForValue().setIfAbsent(lockKey, token, RedisConst.SKUKEY_TIMEOUT, TimeUnit.MINUTES);
             } else {
                 // 程序已经自旋过，已经获取到了锁
                 acquireLock = true;
@@ -142,7 +142,7 @@ public class SkuDetailController {
                 // 自旋
                 for (; ; ) {
                     // 尝试获取锁
-                    boolean retryAcquireLock = redisTemplate.opsForValue().setIfAbsent(lockKey, token, 30, TimeUnit.MINUTES);
+                    boolean retryAcquireLock = redisTemplate.opsForValue().setIfAbsent(lockKey, token, RedisConst.SKUKEY_TIMEOUT, TimeUnit.MINUTES);
                     if (retryAcquireLock) {
                         // 拿到锁之后，就不需要自旋了，把拿到的锁的标记放到ThreadLocal中
                         threadLocal.set(token);
