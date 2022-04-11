@@ -1,6 +1,7 @@
 package com.atguigu.redisson;
 
-import org.junit.Test;
+
+import org.junit.jupiter.api.Test;
 import org.redisson.api.RedissonClient;
 import org.springframework.boot.test.context.SpringBootTest;
 
