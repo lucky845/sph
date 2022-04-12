@@ -38,13 +38,16 @@ public class SkuDetailServiceImpl implements SkuDetailService {
     @Resource
     private ProductSalePropertyKeyMapper salePropertyKeyMapper;
 
-    private final ThreadLocal<String> threadLocal = new ThreadLocal<>();
     @Resource
     private RedisTemplate<Object, Object> redisTemplate;
+
     @Resource
     private RedissonClient redissonClient;
+
     @Resource
     private RBloomFilter<Object> bloomFilter;
+
+    private final ThreadLocal<String> threadLocal = new ThreadLocal<>();
 
     /**
      * 根据skuId查询商品基本信息
