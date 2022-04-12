@@ -16,7 +16,7 @@ public interface SkuDetailService {
      *
      * @param skuId 商品skuId
      */
-    SkuInfo getSkuInfoFromDB(Long skuId);
+    SkuInfo getSkuInfo(Long skuId);
 
     /**
      * 获取该sku对应的销售属性(只有一份)和spu所有的销售属性(全份)
