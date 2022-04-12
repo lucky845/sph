@@ -31,3 +31,8 @@ feign:
       default:
         readTimeout: 30000
         connectTimeout: 10000
+
+# 开启feign远程调用日志
+#logging:
+#  level:
+#    com.atguigu.client: DEBUG
