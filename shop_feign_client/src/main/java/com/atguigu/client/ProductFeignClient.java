@@ -1,9 +1,11 @@
 package com.atguigu.client;
 
+import com.alibaba.fastjson.JSONObject;
 import com.atguigu.entity.BaseCategoryView;
 import com.atguigu.entity.ProductSalePropertyKey;
 import com.atguigu.entity.SkuInfo;
 import com.atguigu.fallback.ProductFallback;
+import com.atguigu.result.RetVal;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -59,5 +61,11 @@ public interface ProductFeignClient {
      */
     @GetMapping("/sku/getSalePropertyAndSkuIdMapping/{productId}")
     Map<Object, Object> getSalePropertyAndSkuIdMapping(@PathVariable long productId);
+
+    /**
+     * 查询首页分类信息
+     */
+    @GetMapping("/product/getIndexCategory")
+    public RetVal<List<JSONObject>> getIndexCategory();
 
 }

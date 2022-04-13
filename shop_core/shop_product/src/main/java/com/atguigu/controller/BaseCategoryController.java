@@ -1,6 +1,7 @@
 package com.atguigu.controller;
 
 
+import com.alibaba.fastjson.JSONObject;
 import com.atguigu.entity.BaseCategory1;
 import com.atguigu.entity.BaseCategory2;
 import com.atguigu.entity.BaseCategory3;
@@ -8,11 +9,15 @@ import com.atguigu.result.RetVal;
 import com.atguigu.service.BaseCategory1Service;
 import com.atguigu.service.BaseCategory2Service;
 import com.atguigu.service.BaseCategory3Service;
+import com.atguigu.service.BaseCategoryViewService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -38,6 +43,9 @@ public class BaseCategoryController {
 
     @Resource
     private BaseCategory3Service baseCategory3Service;
+
+    @Resource
+    private BaseCategoryViewService categoryViewService;
 
     /**
      * 查询一级分类列表
@@ -81,6 +89,17 @@ public class BaseCategoryController {
         baseCategory3QueryWrapper.eq("category2_id", category2Id);
         List<BaseCategory3> baseCategory3List = baseCategory3Service.list(baseCategory3QueryWrapper);
         return RetVal.ok(baseCategory3List);
+    }
+
+
+    /**
+     * 查询首页分类信息
+     */
+    @ApiOperation("查询首页分类信息")
+    @GetMapping("/getIndexCategory")
+    public RetVal<List<JSONObject>> getIndexCategory() {
+        List<JSONObject> categoryViewList = categoryViewService.getIndexCategory();
+        return RetVal.ok(categoryViewList);
     }
 
 }

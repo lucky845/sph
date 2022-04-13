@@ -1,9 +1,11 @@
 package com.atguigu.fallback;
 
+import com.alibaba.fastjson.JSONObject;
 import com.atguigu.client.ProductFeignClient;
 import com.atguigu.entity.BaseCategoryView;
 import com.atguigu.entity.ProductSalePropertyKey;
 import com.atguigu.entity.SkuInfo;
+import com.atguigu.result.RetVal;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -69,5 +71,13 @@ public class ProductFallback implements ProductFeignClient {
     @Override
     public Map<Object, Object> getSalePropertyAndSkuIdMapping(long productId) {
         return new HashMap<>();
+    }
+
+    /**
+     * 查询首页分类信息
+     */
+    @Override
+    public RetVal<List<JSONObject>> getIndexCategory() {
+        return new RetVal<>();
     }
 }
