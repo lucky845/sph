@@ -31,7 +31,7 @@ public class WebDetailController {
     private ProductFeignClient productFeignClient;
 
     @Resource
-    private ThreadPoolExecutor myExecutor;
+    private ThreadPoolExecutor threadPoolExecutor;
 
     /**
      * 商品详情信息(异步执行)
@@ -54,14 +54,14 @@ public class WebDetailController {
             // 3. 根据skuId获取商品的实时价格
             BigDecimal skuPrice = productFeignClient.getSkuPrice(skuId);
             dataMap.put("price", skuPrice);
-        }, myExecutor);
+        }, threadPoolExecutor);
 
         // 1. 根据skuId查询商品的基本信息 发起一个异步请求 有返回值
         CompletableFuture<SkuInfo> skuInfoFuture = CompletableFuture.supplyAsync(() -> {
             SkuInfo skuInfo = productFeignClient.getSkuInfo(skuId);
             dataMap.put("skuInfo", skuInfo);
             return skuInfo;
-        }, myExecutor);
+        }, threadPoolExecutor);
 
         // 2. 根据三级分类id获取商品的分类信息
         CompletableFuture<Void> categoryViewFuture = skuInfoFuture.thenAcceptAsync(skuInfo -> {
@@ -70,7 +70,7 @@ public class WebDetailController {
                 BaseCategoryView categoryView = productFeignClient.getCategoryView(category3Id);
                 dataMap.put("categoryView", categoryView);
             }
-        }, myExecutor);
+        }, threadPoolExecutor);
 
         // 4. 获取该sku对应的销售属性(只有一份)和spu所有的销售属性(全份)
         CompletableFuture<Void> salePropertyFuture = skuInfoFuture.thenAcceptAsync(skuInfo -> {
@@ -79,7 +79,7 @@ public class WebDetailController {
                 List<ProductSalePropertyKey> spuSalePropertyList = productFeignClient.getSpuSalePropertyAndSelected(productId, skuId);
                 dataMap.put("spuSalePropertyList", spuSalePropertyList);
             }
-        }, myExecutor);
+        }, threadPoolExecutor);
 
         CompletableFuture<Void> salePropertyValueIdJsonFuture = skuInfoFuture.thenAcceptAsync(skuInfo -> {
             if (skuInfo != null) {
@@ -88,7 +88,7 @@ public class WebDetailController {
                 Map<Object, Object> salePropertyValueIdJson = productFeignClient.getSalePropertyAndSkuIdMapping(productId);
                 dataMap.put("salePropertyValueIdJson", JSON.toJSONString(salePropertyValueIdJson));
             }
-        }, myExecutor);
+        }, threadPoolExecutor);
 
         // 所有任务都执行完了 才返回商品详情页面
         CompletableFuture.allOf(
