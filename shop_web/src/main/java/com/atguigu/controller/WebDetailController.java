@@ -65,23 +65,29 @@ public class WebDetailController {
 
         // 2. 根据三级分类id获取商品的分类信息
         CompletableFuture<Void> categoryViewFuture = skuInfoFuture.thenAcceptAsync(skuInfo -> {
-            Long category3Id = skuInfo.getCategory3Id();
-            BaseCategoryView categoryView = productFeignClient.getCategoryView(category3Id);
-            dataMap.put("categoryView", categoryView);
+            if (skuInfo != null) {
+                Long category3Id = skuInfo.getCategory3Id();
+                BaseCategoryView categoryView = productFeignClient.getCategoryView(category3Id);
+                dataMap.put("categoryView", categoryView);
+            }
         }, myExecutor);
 
         // 4. 获取该sku对应的销售属性(只有一份)和spu所有的销售属性(全份)
         CompletableFuture<Void> salePropertyFuture = skuInfoFuture.thenAcceptAsync(skuInfo -> {
-            Long productId = skuInfo.getProductId();
-            List<ProductSalePropertyKey> spuSalePropertyList = productFeignClient.getSpuSalePropertyAndSelected(productId, skuId);
-            dataMap.put("spuSalePropertyList", spuSalePropertyList);
+            if (skuInfo != null) {
+                Long productId = skuInfo.getProductId();
+                List<ProductSalePropertyKey> spuSalePropertyList = productFeignClient.getSpuSalePropertyAndSelected(productId, skuId);
+                dataMap.put("spuSalePropertyList", spuSalePropertyList);
+            }
         }, myExecutor);
 
         CompletableFuture<Void> salePropertyValueIdJsonFuture = skuInfoFuture.thenAcceptAsync(skuInfo -> {
-            Long productId = skuInfo.getProductId();
-            //5. 获取skuId与销售属性组合的一个映射关系
-            Map<Object, Object> salePropertyValueIdJson = productFeignClient.getSalePropertyAndSkuIdMapping(productId);
-            dataMap.put("salePropertyValueIdJson", JSON.toJSONString(salePropertyValueIdJson));
+            if (skuInfo != null) {
+                Long productId = skuInfo.getProductId();
+                //5. 获取skuId与销售属性组合的一个映射关系
+                Map<Object, Object> salePropertyValueIdJson = productFeignClient.getSalePropertyAndSkuIdMapping(productId);
+                dataMap.put("salePropertyValueIdJson", JSON.toJSONString(salePropertyValueIdJson));
+            }
         }, myExecutor);
 
         // 所有任务都执行完了 才返回商品详情页面
