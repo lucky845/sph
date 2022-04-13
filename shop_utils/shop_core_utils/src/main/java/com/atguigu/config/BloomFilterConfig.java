@@ -23,7 +23,7 @@ public class BloomFilterConfig {
         // 设置布隆过滤器的名称
         RBloomFilter<Object> bloomFilter = redissonClient.getBloomFilter(RedisConst.BLOOM_SKU_ID);
         // 初始化布隆过滤器，参数为布隆过滤器的可信性，建议设置为常量
-        bloomFilter.tryInit(100000000L, 0.0001);
+        bloomFilter.tryInit(10000L, 0.0001);
         return bloomFilter;
     }
 

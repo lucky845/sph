@@ -33,7 +33,7 @@ public class BloomController {
         // 先删除之前的数据
         bloomFilter.delete();
         // 重新初始化数据
-        bloomFilter.tryInit(100000000L, 0.0001);
+        bloomFilter.tryInit(10000L, 0.0001);
         // 查询数据库所有的SkuInfo信息
         QueryWrapper<SkuInfo> wrapper = new QueryWrapper<>();
         // 只把id字段查出来
