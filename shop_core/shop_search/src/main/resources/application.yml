@@ -1,0 +1,43 @@
+server:
+  port: 8001
+
+spring:
+  application:
+    name: shop-search
+
+  # es配置
+  elasticsearch:
+    rest:
+      uris: http://192.168.229.128:9200
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.229.128:8848
+
+  rabbitmq:
+    host: 192.168.229.128
+    port: 5672
+    username: admin
+    password: 123
+
+  redis:
+    host: 192.168.229.128
+    port: 6389
+    database: 0
+    timeout: 1800000
+
+  # 日期格式化
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+feign:
+  sentinel:
+    enabled: true
+  client:
+    config:
+      default:
+        readTimeout: 3000
+        connectTimeout: 1000
+
