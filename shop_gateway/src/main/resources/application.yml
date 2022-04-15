@@ -26,4 +26,4 @@ spring:
         - id: shop-web
           uri: lb://shop-web
           predicates:
-            - Host=item.gmall.com
+            - Host=*.gmall.com，127.0.0.1
