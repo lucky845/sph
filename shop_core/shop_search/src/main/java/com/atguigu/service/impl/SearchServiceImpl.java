@@ -81,7 +81,6 @@ public class SearchServiceImpl implements SearchService {
                 }).collect(Collectors.toList());
                 product.setPlatformProperty(searchPropertyList);
             }
-
         }
         // 存储到es中
         productMapper.save(product);
