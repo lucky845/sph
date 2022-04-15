@@ -2,7 +2,7 @@ package com.atguigu.mapper;
 
 import com.atguigu.entity.PlatformPropertyKey;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import feign.Param;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -26,4 +26,6 @@ public interface PlatformPropertyKeyMapper extends BaseMapper<PlatformPropertyKe
     List<PlatformPropertyKey> getPlatformPropertyByCategoryId(@Param("category1Id") Long category1Id,
                                                               @Param("category2Id") Long category2Id,
                                                               @Param("category3Id") Long category3Id);
+
+    List<PlatformPropertyKey> getPlatformPropertyBySkuId(@Param("skuId") Long skuId);
 }

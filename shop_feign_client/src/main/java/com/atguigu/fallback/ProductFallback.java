@@ -2,9 +2,7 @@ package com.atguigu.fallback;
 
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.client.ProductFeignClient;
-import com.atguigu.entity.BaseCategoryView;
-import com.atguigu.entity.ProductSalePropertyKey;
-import com.atguigu.entity.SkuInfo;
+import com.atguigu.entity.*;
 import com.atguigu.result.RetVal;
 import org.springframework.stereotype.Component;
 
@@ -78,6 +76,26 @@ public class ProductFallback implements ProductFeignClient {
      */
     @Override
     public RetVal<List<JSONObject>> getIndexCategory() {
-        return new RetVal<>();
+        return RetVal.ok();
+    }
+
+    /**
+     * 根据brandId查询品牌信息
+     *
+     * @param brandId 品牌id
+     */
+    @Override
+    public BaseBrand getBrandByBrandId(Long brandId) {
+        return new BaseBrand();
+    }
+
+    /**
+     * 根据商品skuId查询商品的平台信息
+     *
+     * @param skuId 商品skuId
+     */
+    @Override
+    public List<PlatformPropertyKey> getPlatformPropertyBySkuId(Long skuId) {
+        return new ArrayList<>();
     }
 }

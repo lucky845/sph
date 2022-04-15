@@ -167,5 +167,19 @@ public class BaseBrandController {
         return RetVal.ok(path);
     }
 
+    /**
+     * 根据brandId查询品牌信息
+     *
+     * @param brandId 品牌id
+     */
+    @ApiOperation("根据brandId查询品牌信息")
+    @GetMapping("/getBrandByBrandId/{brandId}")
+    public BaseBrand getBrandByBrandId(
+            @ApiParam(name = "brandId", value = "品牌id", required = true)
+            @PathVariable Long brandId
+    ) {
+        return baseBrandService.getById(brandId);
+    }
+
 }
 

@@ -32,4 +32,20 @@
             </if>
         </where>
     </select>
+
+    <select id="getPlatformPropertyBySkuId" resultMap="PlatformPropertyKeyMap">
+        select a.id,
+               a.property_key,
+               a.category_id,
+               a.category_level,
+               b.id as property_value_id,
+               b.property_value,
+               b.property_key_id
+        from platform_property_key as a
+                 inner join platform_property_value as b
+                            on a.id = b.property_key_id
+                 inner join sku_platform_property_value as c
+                            on b.id = c.property_value_id
+        where c.sku_id = #{skuId}
+    </select>
 </mapper>

@@ -28,6 +28,9 @@ public class PlatformPropertyKeyServiceImpl extends ServiceImpl<PlatformProperty
     @Resource
     private PlatformPropertyValueService propertyValueService;
 
+    @Resource
+    private PlatformPropertyKeyMapper propertyKeyMapper;
+
     /**
      * 根据一二三级分类id获取平台属性信息(优化版)
      *
@@ -66,5 +69,15 @@ public class PlatformPropertyKeyServiceImpl extends ServiceImpl<PlatformProperty
             }
             propertyValueService.saveBatch(propertyValueList);
         }
+    }
+
+    /**
+     * 根据商品skuId查询商品的平台信息
+     *
+     * @param skuId 商品销售属性Id
+     */
+    @Override
+    public List<PlatformPropertyKey> getPlatformPropertyBySkuId(Long skuId) {
+        return propertyKeyMapper.getPlatformPropertyBySkuId(skuId);
     }
 }

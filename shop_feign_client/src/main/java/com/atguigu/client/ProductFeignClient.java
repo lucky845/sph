@@ -1,9 +1,7 @@
 package com.atguigu.client;
 
 import com.alibaba.fastjson.JSONObject;
-import com.atguigu.entity.BaseCategoryView;
-import com.atguigu.entity.ProductSalePropertyKey;
-import com.atguigu.entity.SkuInfo;
+import com.atguigu.entity.*;
 import com.atguigu.fallback.ProductFallback;
 import com.atguigu.result.RetVal;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -67,5 +65,21 @@ public interface ProductFeignClient {
      */
     @GetMapping("/product/getIndexCategory")
     public RetVal<List<JSONObject>> getIndexCategory();
+
+    /**
+     * 根据brandId查询品牌信息
+     *
+     * @param brandId 品牌id
+     */
+    @GetMapping("/product/brand/getBrandByBrandId/{brandId}")
+    public BaseBrand getBrandByBrandId(@PathVariable Long brandId);
+
+    /**
+     * 根据商品skuId查询商品的平台信息
+     *
+     * @param skuId 商品skuId
+     */
+    @GetMapping("/product/getPlatformPropertyBySkuId/{skuId}")
+    public List<PlatformPropertyKey> getPlatformPropertyBySkuId(@PathVariable Long skuId);
 
 }

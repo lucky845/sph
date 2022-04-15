@@ -1,6 +1,7 @@
 package com.atguigu.controller;
 
 
+import com.atguigu.client.SearchFeignClient;
 import com.atguigu.entity.ProductImage;
 import com.atguigu.entity.ProductSalePropertyKey;
 import com.atguigu.entity.SkuInfo;
@@ -39,6 +40,9 @@ public class SkuController {
 
     @Resource
     private SkuInfoService skuInfoService;
+
+    @Resource
+    private SearchFeignClient searchFeignClient;
 
     /**
      * 根据SPUId查询销售属性
@@ -123,7 +127,8 @@ public class SkuController {
         // (1: 是，0：否)
         skuInfo.setIsSale(1);
         skuInfoService.updateById(skuInfo);
-        // TODO 后面涉及到搜索的时候再添加
+        // es上架
+        searchFeignClient.onSale(skuId);
         return RetVal.ok();
     }
 
@@ -143,7 +148,8 @@ public class SkuController {
         // (1: 是，0：否)
         skuInfo.setIsSale(0);
         skuInfoService.updateById(skuInfo);
-        // TODO 后面涉及到搜索的时候再添加
+        // es下架
+        searchFeignClient.offSale(skuId);
         return RetVal.ok();
     }
 
