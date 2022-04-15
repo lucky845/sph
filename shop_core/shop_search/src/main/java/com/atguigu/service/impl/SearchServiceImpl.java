@@ -46,14 +46,14 @@ public class SearchServiceImpl implements SearchService {
             product.setCreateTime(new Date());
             product.setPrice(skuInfo.getPrice().doubleValue());
             product.setDefaultImage(skuInfo.getSkuDefaultImg());
-        }
-        // 2. 品牌信息
-        Long brandId = skuInfo.getBrandId();
-        BaseBrand brand = productFeignClient.getBrandByBrandId(brandId);
-        if (brand != null) {
-            product.setBrandId(brandId);
-            product.setBrandName(brand.getBrandName());
-            product.setBrandLogoUrl(brand.getBrandLogoUrl());
+            // 2. 品牌信息
+            Long brandId = skuInfo.getBrandId();
+            BaseBrand brand = productFeignClient.getBrandByBrandId(brandId);
+            if (brand != null) {
+                product.setBrandId(brandId);
+                product.setBrandName(brand.getBrandName());
+                product.setBrandLogoUrl(brand.getBrandLogoUrl());
+            }
             // 3. 商品的分类信息
             Long category3Id = skuInfo.getCategory3Id();
             BaseCategoryView categoryView = productFeignClient.getCategoryView(category3Id);
@@ -81,6 +81,7 @@ public class SearchServiceImpl implements SearchService {
                 }).collect(Collectors.toList());
                 product.setPlatformProperty(searchPropertyList);
             }
+
         }
         // 存储到es中
         productMapper.save(product);
