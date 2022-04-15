@@ -3,9 +3,9 @@ package com.atguigu.controller;
 import com.alibaba.fastjson.JSONObject;
 import com.atguigu.client.ProductFeignClient;
 import com.atguigu.result.RetVal;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RestController;
 
 import javax.annotation.Resource;
 import java.util.List;
@@ -14,7 +14,7 @@ import java.util.List;
  * @author lucky845
  * @date 2022年04月13日
  */
-@RestController
+@Controller
 public class WebIndexController {
 
     @Resource
