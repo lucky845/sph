@@ -23,6 +23,26 @@ spring:
           uri: lb://shop-product
           predicates:
             - Path=/product/** # 路径匹配
+        - id: shop-user
+          uri: lb://shop-user
+          predicates:
+            - Path=/user/** # 路径匹配
+        - id: shop-cart
+          uri: lb://shop-cart
+          predicates:
+            - Path=/cart/** # 路径匹配
+        - id: shop-order
+          uri: lb://shop-order
+          predicates:
+            - Path=/order/** # 路径匹配
+        - id: shop-payment
+          uri: lb://shop-payment
+          predicates:
+            - Path=/payment/** # 路径匹配
+        - id: shop-seckill
+          uri: lb://shop-seckill
+          predicates:
+            - Path=/seckill/** # 路径匹配
         - id: shop-web
           uri: lb://shop-web
           predicates:

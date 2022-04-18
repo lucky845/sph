@@ -21,7 +21,7 @@ public class SearchParam {
     private String[] props;
     //分页信息
     private Integer pageNo = 1;
-    private Integer pageSize = 3;
+    private Integer pageSize = 5;
 
 
 }
