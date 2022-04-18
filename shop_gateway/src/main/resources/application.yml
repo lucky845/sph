@@ -47,3 +47,5 @@ spring:
           uri: lb://shop-web
           predicates:
             - Host=*.gmall.com,127.0.0.1
+filter:
+  whiteList: addCart.html,myOrder.html
