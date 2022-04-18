@@ -15,6 +15,7 @@
     <modules>
         <module>shop_product</module>
         <module>shop_search</module>
+        <module>shop_user</module>
     </modules>
 
     <properties>

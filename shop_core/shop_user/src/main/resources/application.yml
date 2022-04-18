@@ -1,0 +1,33 @@
+server:
+  port: 8002
+
+mybatis-plus:
+  mapper-locations: classpath:com/atguigu/mapper/xml/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+spring:
+  application:
+    name: shop-user
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.229.128:8848
+
+  redis:
+    host: 192.168.229.128
+    port: 6389
+    database: 0
+    timeout: 1800000
+
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://192.168.229.128:3306/shop_user?characterEncoding=utf-8&useSSL=false
+    username: root
+    password: root
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
