@@ -45,13 +45,11 @@ public class AccessFilter implements GlobalFilter {
      */
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
-        // 1. 对于内部接口，不允许外界访问
         ServerHttpRequest request = exchange.getRequest();
         String path = request.getURI().getPath();
-
-        // 2. 获取用户的临时id在购物车使用
+        // 3. 获取用户的临时id在购物车使用
         String userTempId = getUserTempId(request);
-        // 获取用户的登陆id,购物车使用
+        // 4. 获取用户的登陆id,购物车使用
         String userId = getUserId(request);
         // 如果用户换了一个网络环境(cookie被盗)，就提示没有权限
         if ("-1".equals(userId)) {
@@ -59,15 +57,15 @@ public class AccessFilter implements GlobalFilter {
             return writeDataToBrowser(exchange, RetValCodeEnum.NO_PERMISSION);
         }
 
-        // 3. 如果请求路径包含sku我们就让它不能访问，提示没有权限
+        // 1. 对于内部接口，不允许外界访问，提示没有权限
         if (antPathMatcher.match("/sku/**", path)) {
             // 把信息写给浏览器
             return writeDataToBrowser(exchange, RetValCodeEnum.NO_PERMISSION);
         }
 
-        // 4. 请求白名单(指定那些接口)，必须先登陆
+        // 2. 请求白名单(指定那些接口)，并且用户未登录的情况下，必须先登陆
         for (String filterWhite : filterWhiteList.split(",")) {
-            if (path.contains(filterWhite)) {
+            if (path.contains(filterWhite) && StringUtils.isEmpty(userId)) {
                 // 跳转到登陆页面
                 ServerHttpResponse response = exchange.getResponse();
                 response.setStatusCode(HttpStatus.SEE_OTHER);
