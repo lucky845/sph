@@ -19,7 +19,7 @@ public class CodeGenerator {
         GlobalConfig globalConfig = new GlobalConfig();
         //String projectPath = System.getProperty("user.dir");
         //globalConfig.setOutputDir(projectPath + "/src/main/java");
-        globalConfig.setOutputDir("E:\\Projects\\atguigu-projects\\shop-parent\\shop_core\\shop_user\\src\\main\\java");
+        globalConfig.setOutputDir("E:\\Projects\\atguigu-projects\\shop-parent\\shop_core\\shop_cart\\src\\main\\java");
         globalConfig.setAuthor("lucky845");
         //生成后是否打开资源管理器
         globalConfig.setOpen(false);
@@ -37,7 +37,7 @@ public class CodeGenerator {
 
         // 3、数据源配置
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
-        dataSourceConfig.setUrl("jdbc:mysql://192.168.229.128:3306/shop_user?serverTimezone=GMT%2B8&useSSL=false");
+        dataSourceConfig.setUrl("jdbc:mysql://192.168.229.128:3306/shop_order?serverTimezone=GMT%2B8&useSSL=false");
         dataSourceConfig.setDriverName("com.mysql.jdbc.Driver");
         dataSourceConfig.setUsername("root");
         dataSourceConfig.setPassword("root");
@@ -63,7 +63,7 @@ public class CodeGenerator {
 //        strategy.setInclude("sku_info","sku_platform_property_value","sku_sale_property_value","sku_image");
 //        strategy.setInclude("base_category_view");
 //        strategy.setInclude("user_info","user_address");
-        //strategy.setInclude("cart_info");
+//        strategy.setInclude("cart_info");
         //strategy.setInclude("order_detail","order_info","payment_info");
         //strategy.setInclude("seckill_product");
         strategy.setNaming(NamingStrategy.underline_to_camel);//数据库表映射到实体的命名策略
