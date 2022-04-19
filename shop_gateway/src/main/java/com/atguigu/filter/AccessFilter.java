@@ -14,6 +14,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.http.server.reactive.ServerHttpResponse;
+import org.springframework.stereotype.Component;
 import org.springframework.util.AntPathMatcher;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -30,7 +31,7 @@ import java.util.List;
  * @author lucky845
  * @date 2022年04月18日
  */
-//@Component
+@Component
 public class AccessFilter implements GlobalFilter {
 
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
