@@ -6,7 +6,9 @@ import com.atguigu.entity.CartInfo;
 import com.atguigu.entity.OrderDetail;
 import com.atguigu.entity.OrderInfo;
 import com.atguigu.entity.UserAddress;
+import com.atguigu.enums.ProcessStatus;
 import com.atguigu.mapper.OrderInfoMapper;
+import com.atguigu.service.OrderDetailService;
 import com.atguigu.service.OrderInfoService;
 import com.atguigu.util.AuthContextHolder;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -16,10 +18,7 @@ import org.springframework.util.CollectionUtils;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>
@@ -37,6 +36,9 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
     @Resource
     private CartFeignClient cartFeignClient;
+
+    @Resource
+    private OrderDetailService orderDetailService;
 
     /**
      * 订单确认接口
@@ -75,6 +77,41 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         retMap.put("totalMoney", totalMoney);
         retMap.put("totalNum", totalNum);
         return retMap;
+    }
+
+    /**
+     * 提交订单信息
+     *
+     * @param orderInfo 订单信息
+     */
+    @Override
+    public Long saveOrderAndDetail(OrderInfo orderInfo) {
+        // 1. 保存订单基本信息
+        // 商品对外交易号，给微信或者支付宝使用
+        String outTradeNo = "lucky845" + System.currentTimeMillis();
+        orderInfo.setOutTradeNo(outTradeNo);
+        // 订单的描述信息
+        orderInfo.setTradeBody("换个新手机爽一爽");
+        // 订单创建时间
+        orderInfo.setCreateTime(new Date());
+        // 订单支付过期时间
+        Calendar calendar = Calendar.getInstance();
+        calendar.add(Calendar.MINUTE, 30);
+        orderInfo.setExpireTime(calendar.getTime());
+        // 订单的进度状态
+        orderInfo.setProcessStatus(ProcessStatus.UNPAID.name());
+        baseMapper.insert(orderInfo);
+
+        // 2. 保存订单详细信息
+        Long orderInfoId = orderInfo.getId();
+        List<OrderDetail> orderDetailList = orderInfo.getOrderDetailList();
+        if (!CollectionUtils.isEmpty(orderDetailList)) {
+            for (OrderDetail orderDetail : orderDetailList) {
+                orderDetail.setOrderId(orderInfoId);
+            }
+            orderDetailService.saveBatch(orderDetailList);
+        }
+        return orderInfoId;
     }
 
 }

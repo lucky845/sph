@@ -21,4 +21,10 @@ public interface OrderInfoService extends IService<OrderInfo> {
      */
     Map<String, Object> confirm(HttpServletRequest request);
 
+    /**
+     * 保存用户订单返回订单号
+     *
+     * @param orderInfo 订单信息
+     */
+    Long saveOrderAndDetail(OrderInfo orderInfo);
 }

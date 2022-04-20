@@ -1,13 +1,14 @@
 package com.atguigu.controller;
 
 
+import com.atguigu.entity.OrderInfo;
 import com.atguigu.result.RetVal;
 import com.atguigu.service.OrderInfoService;
+import com.atguigu.util.AuthContextHolder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import io.swagger.annotations.ApiParam;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
@@ -39,6 +40,25 @@ public class OrderInfoController {
         return RetVal.ok(retMap);
     }
 
+    /**
+     * 提交订单信息
+     *
+     * @param orderInfo 订单信息
+     */
+    @ApiOperation("提交订单信息")
+    @PostMapping("/submitOrder")
+    public RetVal<Long> submitOrder(
+            @ApiParam(name = "orderInfo", value = "订单信息", required = true)
+            @RequestBody OrderInfo orderInfo,
+            HttpServletRequest request
+    ) {
+        // 拿到用户id赋值给orderInfo
+        String userId = AuthContextHolder.getUserId(request);
+        orderInfo.setUserId(Long.valueOf(userId));
+        // 保存订单信息，返回订单id
+        Long orderId = orderInfoService.saveOrderAndDetail(orderInfo);
+        return RetVal.ok(orderId);
+    }
 
 }
 
