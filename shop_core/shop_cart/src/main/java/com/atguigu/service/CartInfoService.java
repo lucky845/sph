@@ -49,4 +49,10 @@ public interface CartInfoService extends IService<CartInfo> {
      */
     void deleteCart(String oneOfUserId, Long skuId);
 
+    /**
+     * 查询用户购物清单
+     *
+     * @param userId 用户id
+     */
+    List<CartInfo> getSelectedProduct(String userId);
 }

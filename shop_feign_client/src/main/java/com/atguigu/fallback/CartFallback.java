@@ -1,7 +1,11 @@
 package com.atguigu.fallback;
 
 import com.atguigu.client.CartFeignClient;
+import com.atguigu.entity.CartInfo;
 import com.atguigu.result.RetVal;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author lucky845
@@ -19,4 +23,13 @@ public class CartFallback implements CartFeignClient {
         return RetVal.ok();
     }
 
+    /**
+     * 查询用户购物清单
+     *
+     * @param userId 用户id
+     */
+    @Override
+    public List<CartInfo> getSelectedProduct(String userId) {
+        return new ArrayList<>();
+    }
 }

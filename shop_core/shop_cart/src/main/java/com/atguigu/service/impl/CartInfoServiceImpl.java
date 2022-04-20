@@ -172,6 +172,26 @@ public class CartInfoServiceImpl extends ServiceImpl<CartInfoMapper, CartInfo> i
     }
 
     /**
+     * 查询用户购物清单
+     *
+     * @param userId 用户id
+     */
+    @Override
+    public List<CartInfo> getSelectedProduct(String userId) {
+        ArrayList<CartInfo> checkCartInfoList = new ArrayList<>();
+        String userCartKey = getUserCartKey(userId);
+        List<CartInfo> redisCartInfoList = redisTemplate.opsForHash().values(userCartKey);
+        if (!CollectionUtils.isEmpty(redisCartInfoList)) {
+            for (CartInfo cartInfo : redisCartInfoList) {
+                if (cartInfo.getIsChecked() == 1) {
+                    checkCartInfoList.add(cartInfo);
+                }
+            }
+        }
+        return checkCartInfoList;
+    }
+
+    /**
      * 从数据库删除购物车信息
      *
      * @param oneOfUserId 用户id或临时用户id

@@ -128,6 +128,20 @@ public class CartInfoController {
         return RetVal.ok();
     }
 
+    /**
+     * 查询用户购物清单
+     *
+     * @param userId 用户id
+     */
+    @ApiOperation("查询用户购物清单")
+    @GetMapping("/getSelectedProduct/{userId}")
+    public List<CartInfo> getSelectedProduct(
+            @ApiParam(name = "userId", value = "用户id", required = true)
+            @PathVariable String userId
+    ) {
+        return cartInfoService.getSelectedProduct(userId);
+    }
+
 
 }
 
