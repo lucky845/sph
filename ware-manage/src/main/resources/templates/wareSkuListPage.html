@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta content="text/html; charset=UTF-8" http-equiv="Content-Type">
+    <title>主界面</title>
+    <script src="/easyui/jquery.min.js" type="text/javascript"></script>
+    <script src="/easyui/jquery.easyui.min.js" type="text/javascript"></script>
+    <script src="/easyui/easyloader.js" type="text/javascript"></script>
+    <link href="/easyui/themes/icon.css" rel="stylesheet" type="text/css">
+    <link href="/easyui/themes/default/easyui.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+<div class="easyui-panel" data-options="border:true" title="">
+
+
+    <table class="easyui-datagrid" data-options="singleSelect:true,method:'get',url:'wareSkuList' ,toolbar:'#tb'"
+           id="dg"
+           title="库存单元列表">
+        <thead>
+        <tr>
+            <th data-options="field:'id'" width="5%">id</th>
+            <th data-options="field:'stockName'" width="30%">库存单元名称</th>
+            <th data-options="field:'stock'" width="10%">实际库存数量</th>
+            <th data-options="field:'stockLocked'" width="10%">锁定库存数量</th>
+            <th data-options="field:'skuId'" width="10%">外部skuId</th>
+            <th data-options="field:'warehouseName'" width="20%">仓库</th>
+        </tr>
+        </thead>
+    </table>
+    <div id="tb" style="padding:5px;height:auto">
+        <div style="margin-bottom:5px">
+            <a class="easyui-linkbutton" href="#" iconCls="icon-add" onclick="addWareSku()" plain="true">添加</a>
+            <a class="easyui-linkbutton" href="#" iconCls="icon-edit" onclick="editWareSku()" plain="true">编辑</a>
+            <a class="easyui-linkbutton" href="#" iconCls="icon-remove" plain="true">删除</a>
+        </div>
+        <div>
+
+
+        </div>
+    </div>
+</div>
+
+<div buttons="#bb" class="easyui-dialog" closed="true" data-options="iconCls:'icon-save',resizable:true,modal:false"
+     id="dlg" style="width:260px;height:350px;" title="库存单元">
+
+    <form id="wareSkuForm">
+        <br/>
+        <label>库存单元名称:</label><br/>
+        <div style=" text-align: center"><input class="easyui-textbox" data-options="" id="stockName" name="stockName"
+                                                style="left:40px;width:200px"/></div>
+        <br/>
+        <label>库存数量:</label><br/>
+        <div style=" text-align: center"><input class="easyui-textbox" data-options="" id="stock" name="stockName"
+                                                style="width:200px"/></div>
+        <br/>
+        <label>外部skuId:</label><br/>
+        <div style=" text-align: center"><input class="easyui-textbox" data-options="" id="skuId" name="skuId"
+                                                style="width:200px"/></div>
+        <br/>
+        <label>仓库:</label><br/>
+        <div style=" text-align: center"><select class="easyui-combobox"
+                                                 data-options="valueField:'id',textField:'name',method:'get',url:'wareInfoList'"
+                                                 id="warehouseId" name="warehouse" style="width:200px"> </select></div>
+
+
+    </form>
+
+</div>
+
+<div id="bb">
+    <a class="easyui-linkbutton" href="#" onclick="saveWareSku()">保存</a>
+    <a class="easyui-linkbutton" href="#">关闭</a>
+</div>
+
+</body>
+<script language="javascript">
+    /*<![CDATA[*/
+    function saveWareSku() {
+        var formJson = {};
+        //把表格中的数据循环组合成json
+        formJson['warehouseId'] = $('#warehouseId').combobox("getValue");
+        formJson["stock"] = $("#stock").val();
+        formJson["stockName"] = $("#stockName").val();
+        formJson["skuId"] = $("#skuId").val();
+
+        //ajax 保存到后台
+        $.post("saveWareSku", formJson, function (data) {
+            $("#dlg").dialog("close");
+            $("#dg").datagrid("reload");
+        });
+    }
+
+
+    function addWareSku() {
+
+        //弹出框
+        $("#dlg").dialog("open");
+        //进系统前先清空
+        $("#stock").textbox('clear');
+        $("#stockName").textbox('clear');
+        $("#skuId").textbox('clear');
+        $('#warehouseId').combobox('reset');
+
+    }
+
+
+    /*]]>*/
+</script>
+
+</html>
