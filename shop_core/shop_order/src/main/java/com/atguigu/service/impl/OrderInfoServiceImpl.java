@@ -1,6 +1,7 @@
 package com.atguigu.service.impl;
 
 import com.atguigu.client.CartFeignClient;
+import com.atguigu.client.ProductFeignClient;
 import com.atguigu.client.UserFeignClient;
 import com.atguigu.constant.RedisConst;
 import com.atguigu.entity.CartInfo;
@@ -12,6 +13,7 @@ import com.atguigu.mapper.OrderInfoMapper;
 import com.atguigu.service.OrderDetailService;
 import com.atguigu.service.OrderInfoService;
 import com.atguigu.util.AuthContextHolder;
+import com.atguigu.util.HttpClientUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -44,6 +46,9 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
     @Resource
     private RedisTemplate<Object, Object> redisTemplate;
+
+    @Resource
+    private ProductFeignClient productFeignClient;
 
     /**
      * 订单确认接口
@@ -111,6 +116,39 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         String redisTradeNo = (String) redisTemplate.opsForValue().get(tradeNoKey);
         // Redis中已经有了,代表重复提交
         return tradeNoUI.equals(redisTradeNo);
+    }
+
+    /**
+     * 使用库存系统校验库存与价格
+     *
+     * @param userId    用户id
+     * @param orderInfo 订单信息
+     */
+    @Override
+    public String checkStockAndPrice(String userId, OrderInfo orderInfo) {
+        StringBuilder sb = new StringBuilder();
+        // 1. 拿到用户的购物清单
+        List<OrderDetail> orderDetailList = orderInfo.getOrderDetailList();
+        if (!CollectionUtils.isEmpty(orderDetailList)) {
+            for (OrderDetail orderDetail : orderDetailList) {
+                Long skuId = orderDetail.getSkuId();
+                String skuNum = orderDetail.getSkuNum();
+                // 2. 调用库存系统,判断库存是否足够
+                String url = "http://localhost:8100/hasStock?skuId=" + skuId + "&num=" + skuNum;
+                String result = HttpClientUtil.doGet(url);
+                // 判断库存是否充足
+                if ("0".equals(result)) {
+                    sb.append(orderDetail.getSkuName()).append("库存不足,");
+                }
+                // 判断商品价格是否发生了变化
+                BigDecimal realTimePrice = productFeignClient.getSkuPrice(skuId);
+                BigDecimal orderPrice = orderDetail.getOrderPrice();
+                if (orderPrice.compareTo(realTimePrice) != 0) {
+                    sb.append(orderDetail.getSkuName()).append("价格有变化,请刷新页面");
+                }
+            }
+        }
+        return sb.toString();
     }
 
     /**

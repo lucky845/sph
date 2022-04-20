@@ -9,6 +9,7 @@ import com.atguigu.util.AuthContextHolder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import jodd.util.StringUtil;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
@@ -66,6 +67,11 @@ public class OrderInfoController {
         boolean flag = orderInfoService.checkTradeNo(userId, tradeNoUI);
         if (!flag) {
             return RetVal.fail().message("请勿重复提交订单");
+        }
+        // 使用库存系统校验库存与价格
+        String warningMessage = orderInfoService.checkStockAndPrice(userId, orderInfo);
+        if (!StringUtil.isEmpty(warningMessage)) {
+            return RetVal.fail().message(warningMessage);
         }
         // 保存订单信息，返回订单id
         Long orderId = orderInfoService.saveOrderAndDetail(orderInfo);
