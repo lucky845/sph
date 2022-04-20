@@ -27,4 +27,6 @@ public interface OrderInfoService extends IService<OrderInfo> {
      * @param orderInfo 订单信息
      */
     Long saveOrderAndDetail(OrderInfo orderInfo);
+
+    boolean checkTradeNo(String userId, String tradeNoUI);
 }

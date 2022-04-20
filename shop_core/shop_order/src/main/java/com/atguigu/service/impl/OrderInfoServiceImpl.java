@@ -2,6 +2,7 @@ package com.atguigu.service.impl;
 
 import com.atguigu.client.CartFeignClient;
 import com.atguigu.client.UserFeignClient;
+import com.atguigu.constant.RedisConst;
 import com.atguigu.entity.CartInfo;
 import com.atguigu.entity.OrderDetail;
 import com.atguigu.entity.OrderInfo;
@@ -12,6 +13,7 @@ import com.atguigu.service.OrderDetailService;
 import com.atguigu.service.OrderInfoService;
 import com.atguigu.util.AuthContextHolder;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -39,6 +41,9 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
     @Resource
     private OrderDetailService orderDetailService;
+
+    @Resource
+    private RedisTemplate<Object, Object> redisTemplate;
 
     /**
      * 订单确认接口
@@ -76,7 +81,41 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         retMap.put("detailArrayList", orderDetailList);
         retMap.put("totalMoney", totalMoney);
         retMap.put("totalNum", totalNum);
+        // 生成一个流水号给界面(防止订单重复提交)
+        String tradeNo = generateTradeNo(userId);
+        retMap.put("tradeNo", tradeNo);
         return retMap;
+    }
+
+    /**
+     * 生成一个订单流水号
+     *
+     * @param userId 用户id
+     */
+    private String generateTradeNo(String userId) {
+        String tradeNo = UUID.randomUUID().toString();
+        // 在Redis中放一份
+        String tradeNoKey = RedisConst.TRADENO_PREFIX + userId + RedisConst.TRADENO_SUFFIX;
+        redisTemplate.opsForValue().set(tradeNoKey, tradeNo);
+        return tradeNo;
+    }
+
+    /**
+     * @param userId
+     * @param tradeNoUI
+     */
+    @Override
+    public boolean checkTradeNo(String userId, String tradeNoUI) {
+        // 从Redis中取出tradeNo进行对比
+        String tradeNoKey = RedisConst.TRADENO_PREFIX + userId + RedisConst.TRADENO_SUFFIX;
+        String redisTradeNo = (String) redisTemplate.opsForValue().get(tradeNoKey);
+        if (tradeNoUI.equals(redisTradeNo)) {
+            // Redis中已经有了,代表重复提交
+            return true;
+        }
+        // Redis中没有,不是重复提交,删除Redis中的tradeNo
+        redisTemplate.delete(tradeNoKey);
+        return false;
     }
 
     /**

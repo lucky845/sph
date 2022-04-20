@@ -47,7 +47,7 @@ public class OrderInfoController {
      */
     @ApiOperation("提交订单信息")
     @PostMapping("/submitOrder")
-    public RetVal<Long> submitOrder(
+    public RetVal<Object> submitOrder(
             @ApiParam(name = "orderInfo", value = "订单信息", required = true)
             @RequestBody OrderInfo orderInfo,
             HttpServletRequest request
@@ -55,6 +55,13 @@ public class OrderInfoController {
         // 拿到用户id赋值给orderInfo
         String userId = AuthContextHolder.getUserId(request);
         orderInfo.setUserId(Long.valueOf(userId));
+        // 获取订单传递过来的订单流水号
+        String tradeNoUI = request.getParameter("tradeNo");
+        // 判断订单是否已经提交过
+        boolean flag = orderInfoService.checkTradeNo(userId, tradeNoUI);
+        if (!flag) {
+            return RetVal.fail().message("请勿重复提交订单");
+        }
         // 保存订单信息，返回订单id
         Long orderId = orderInfoService.saveOrderAndDetail(orderInfo);
         return RetVal.ok(orderId);

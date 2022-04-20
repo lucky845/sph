@@ -6,6 +6,10 @@ package com.atguigu.constant;
 public class RedisConst {
 
     public static final String SKUKEY_PREFIX = "sku:";
+
+    public static final String TRADENO_PREFIX = "user:";
+
+    public static final String TRADENO_SUFFIX = ":tradeNo";
     public static final String SKUKEY_SUFFIX = ":info";
     //商品sku_id布隆过滤器
     public static final String BLOOM_SKU_ID = "bloom_sku_id";
