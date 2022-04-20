@@ -5,6 +5,7 @@ import com.atguigu.constant.RedisConst;
 import com.atguigu.entity.CartInfo;
 import com.atguigu.entity.SkuInfo;
 import com.atguigu.mapper.CartInfoMapper;
+import com.atguigu.service.AsyncCartInfoService;
 import com.atguigu.service.CartInfoService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -41,6 +42,9 @@ public class CartInfoServiceImpl extends ServiceImpl<CartInfoMapper, CartInfo> i
     @Resource
     private RedisTemplate redisTemplate;
 
+    @Resource
+    private AsyncCartInfoService asyncCartInfoService;
+
     /**
      * 加入购物车
      *
@@ -63,7 +67,8 @@ public class CartInfoServiceImpl extends ServiceImpl<CartInfoMapper, CartInfo> i
             BigDecimal skuPrice = productFeignClient.getSkuPrice(skuId);
             existCartInfo.setRealTimePrice(skuPrice);
             // 修改库存数量
-            baseMapper.updateById(existCartInfo);
+//            baseMapper.updateById(existCartInfo);
+            asyncCartInfoService.updateCartInfo(existCartInfo);
         } else {
             existCartInfo = new CartInfo();
             SkuInfo skuInfo = productFeignClient.getSkuInfo(skuId);
@@ -80,7 +85,8 @@ public class CartInfoServiceImpl extends ServiceImpl<CartInfoMapper, CartInfo> i
             BigDecimal skuPrice = productFeignClient.getSkuPrice(skuId);
             existCartInfo.setRealTimePrice(skuPrice);
             // 保存到数据库
-            baseMapper.insert(existCartInfo);
+//            baseMapper.insert(existCartInfo);
+            asyncCartInfoService.saveCartInfo(existCartInfo);
         }
         // 4. 保存一份到Redis中
         String userCartKey = getUserCartKey(oneOfUserId);
@@ -141,7 +147,8 @@ public class CartInfoServiceImpl extends ServiceImpl<CartInfoMapper, CartInfo> i
             setCartKeyExpire(userCartKey);
         }
         // 2. 从数据库中获取数据进行修改
-        checkDbCart(oneOfUserId, skuId, isChecked);
+//        checkDbCart(oneOfUserId, skuId, isChecked);
+        asyncCartInfoService.checkDbCart(oneOfUserId, skuId, isChecked);
     }
 
     /**
@@ -160,7 +167,8 @@ public class CartInfoServiceImpl extends ServiceImpl<CartInfoMapper, CartInfo> i
             boundHashOperations.delete(skuId.toString());
         }
         // 2. 从数据库中删除
-        deleteCartInfo(oneOfUserId, skuId);
+//        deleteCartInfo(oneOfUserId, skuId);
+        asyncCartInfoService.deleteCartInfo(oneOfUserId, skuId);
     }
 
     /**
