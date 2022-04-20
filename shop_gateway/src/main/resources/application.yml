@@ -48,4 +48,4 @@ spring:
           predicates:
             - Host=*.gmall.com,127.0.0.1
 filter:
-  whiteList: addCart.html,myOrder.html
+  whiteList: "order.html" # addCart.html,myOrder.html
