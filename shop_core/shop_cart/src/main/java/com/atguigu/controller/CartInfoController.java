@@ -103,6 +103,31 @@ public class CartInfoController {
         return RetVal.ok();
     }
 
+    /**
+     * 删除购物车项
+     *
+     * @param skuId 商品skuId
+     */
+    @ApiOperation("删除购物车项")
+    @DeleteMapping("/deleteCart/{skuId}")
+    public RetVal<Object> deleteCart(
+            @ApiParam(name = "skuId", value = "商品skuId", required = true)
+            @PathVariable Long skuId,
+
+            HttpServletRequest request
+    ) {
+        String oneOfUserId = "";
+        String userId = AuthContextHolder.getUserId(request);
+        if (StringUtils.isEmpty(userId)) {
+            // 用户未登录,使用临时用户
+            oneOfUserId = AuthContextHolder.getUserTempId(request);
+        } else {
+            oneOfUserId = userId;
+        }
+        cartInfoService.deleteCart(oneOfUserId, skuId);
+        return RetVal.ok();
+    }
+
 
 }
 

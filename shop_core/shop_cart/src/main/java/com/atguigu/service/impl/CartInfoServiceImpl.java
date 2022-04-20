@@ -13,6 +13,7 @@ import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
 import java.math.BigDecimal;
@@ -141,6 +142,42 @@ public class CartInfoServiceImpl extends ServiceImpl<CartInfoMapper, CartInfo> i
         }
         // 2. 从数据库中获取数据进行修改
         checkDbCart(oneOfUserId, skuId, isChecked);
+    }
+
+    /**
+     * 删除购物车项
+     *
+     * @param oneOfUserId 用户id或临时用户id
+     * @param skuId       商品skuId
+     */
+    @Override
+    public void deleteCart(String oneOfUserId, Long skuId) {
+        // 1. 从Redis中删除
+        String userCartKey = getUserCartKey(oneOfUserId);
+        BoundHashOperations boundHashOperations = redisTemplate.boundHashOps(userCartKey);
+        if (boundHashOperations.hasKey(skuId.toString())) {
+            // 删除Redis中的数据
+            boundHashOperations.delete(skuId.toString());
+        }
+        // 2. 从数据库中删除
+        deleteCartInfo(oneOfUserId, skuId);
+    }
+
+    /**
+     * 从数据库删除购物车信息
+     *
+     * @param oneOfUserId 用户id或临时用户id
+     * @param skuId       商品skuId
+     */
+    private void deleteCartInfo(String oneOfUserId, Long skuId) {
+        QueryWrapper<CartInfo> wrapper = new QueryWrapper<>();
+        if (!StringUtils.isEmpty(oneOfUserId)) {
+            wrapper.eq("user_id", oneOfUserId);
+        }
+        if (!StringUtils.isEmpty(skuId)) {
+            wrapper.eq("sku_id", skuId);
+        }
+        baseMapper.delete(wrapper);
     }
 
     /**
