@@ -109,7 +109,7 @@ public class CartInfoServiceImpl extends ServiceImpl<CartInfoMapper, CartInfo> i
         }
 
         // 用户已登录
-        if (!StringUtil.isEmpty(userId) && !StringUtil.isEmpty(userTempId)) {
+        if (!StringUtil.isEmpty(userId)) {
             // 1. 先查询未登录的购物车项
             List<CartInfo> noLoginCartInfoList = queryCartInfoListFromDbToRedis(userTempId);
             if (!CollectionUtils.isEmpty(noLoginCartInfoList)) {
@@ -237,14 +237,14 @@ public class CartInfoServiceImpl extends ServiceImpl<CartInfoMapper, CartInfo> i
         // 2. 查询已登陆的购物车项
         List<CartInfo> loginCartInfoList = queryCartInfoListFromDbToRedis(userId);
         // 3. 把已登陆的购物车项转换为一个map，可以根据key判断该map中是否有记录可以减少迭代
-        Map<Long, CartInfo> longCartInfoMap = loginCartInfoList.stream()
+        Map<Long, CartInfo> longinCartInfoMap = loginCartInfoList.stream()
                 .collect(Collectors.toMap(CartInfo::getSkuId, cartInfo -> cartInfo));
         // 4.
         for (CartInfo noLoginCartInfo : noLoginCartInfoList) {
             Long noLoginCartInfoSkuId = noLoginCartInfo.getSkuId();
             // 对比skuId是否相同，代表已登录里面包含该购物车项
-            if (longCartInfoMap.containsKey(noLoginCartInfoSkuId)) {
-                CartInfo loginCartInfo = longCartInfoMap.get(noLoginCartInfoSkuId);
+            if (longinCartInfoMap.containsKey(noLoginCartInfoSkuId)) {
+                CartInfo loginCartInfo = longinCartInfoMap.get(noLoginCartInfoSkuId);
                 // 商品数量相加
                 loginCartInfo.setSkuNum(loginCartInfo.getSkuNum() + noLoginCartInfo.getSkuNum());
                 // 当未登录的商品勾选了的时候，登录后也应该勾选
@@ -256,7 +256,10 @@ public class CartInfoServiceImpl extends ServiceImpl<CartInfoMapper, CartInfo> i
             } else {
                 // 如果已登陆的里面没有
                 noLoginCartInfo.setUserId(userId);
-                baseMapper.updateById(noLoginCartInfo);
+                QueryWrapper<CartInfo> wrapper = new QueryWrapper<>();
+                wrapper.eq("sku_id", noLoginCartInfoSkuId);
+                baseMapper.update(noLoginCartInfo, wrapper);
+//                baseMapper.updateById(noLoginCartInfo);
             }
         }
 
