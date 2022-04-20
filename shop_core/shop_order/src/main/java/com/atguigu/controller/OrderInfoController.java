@@ -1,6 +1,7 @@
 package com.atguigu.controller;
 
 
+import com.atguigu.constant.RedisConst;
 import com.atguigu.entity.OrderInfo;
 import com.atguigu.result.RetVal;
 import com.atguigu.service.OrderInfoService;
@@ -8,6 +9,7 @@ import com.atguigu.util.AuthContextHolder;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -29,6 +31,9 @@ public class OrderInfoController {
 
     @Resource
     private OrderInfoService orderInfoService;
+
+    @Resource
+    private RedisTemplate<Object, Object> redisTemplate;
 
     /**
      * 提供订单确认的接口
@@ -64,6 +69,9 @@ public class OrderInfoController {
         }
         // 保存订单信息，返回订单id
         Long orderId = orderInfoService.saveOrderAndDetail(orderInfo);
+        // 删除Redis中的tradeNo
+        String tradeNoKey = RedisConst.TRADENO_PREFIX + userId + RedisConst.TRADENO_SUFFIX;
+        redisTemplate.delete(tradeNoKey);
         return RetVal.ok(orderId);
     }
 

@@ -101,21 +101,16 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
     }
 
     /**
-     * @param userId
-     * @param tradeNoUI
+     * @param userId    用户id
+     * @param tradeNoUI 订单流水号
      */
     @Override
     public boolean checkTradeNo(String userId, String tradeNoUI) {
         // 从Redis中取出tradeNo进行对比
         String tradeNoKey = RedisConst.TRADENO_PREFIX + userId + RedisConst.TRADENO_SUFFIX;
         String redisTradeNo = (String) redisTemplate.opsForValue().get(tradeNoKey);
-        if (tradeNoUI.equals(redisTradeNo)) {
-            // Redis中已经有了,代表重复提交
-            return true;
-        }
-        // Redis中没有,不是重复提交,删除Redis中的tradeNo
-        redisTemplate.delete(tradeNoKey);
-        return false;
+        // Redis中已经有了,代表重复提交
+        return tradeNoUI.equals(redisTradeNo);
     }
 
     /**
