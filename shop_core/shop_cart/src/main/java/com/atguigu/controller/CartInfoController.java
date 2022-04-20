@@ -1,6 +1,7 @@
 package com.atguigu.controller;
 
 
+import com.alibaba.nacos.client.naming.utils.StringUtils;
 import com.atguigu.entity.CartInfo;
 import com.atguigu.result.RetVal;
 import com.atguigu.service.CartInfoService;
@@ -71,6 +72,35 @@ public class CartInfoController {
 
         List<CartInfo> cartInfoList = cartInfoService.getCartList(userId, userTempId);
         return RetVal.ok(cartInfoList);
+    }
+
+    /**
+     * 修改购物车勾选状态
+     *
+     * @param skuId     商品skuId
+     * @param isChecked 商品勾选状态
+     */
+    @ApiOperation("修改购物车勾选状态")
+    @GetMapping("/checkCart/{skuId}/{isChecked}")
+    public RetVal<Object> checkCart(
+            @ApiParam(name = "skuId", value = "商品skuId", required = true)
+            @PathVariable Long skuId,
+
+            @ApiParam(name = "isChecked", value = "商品勾选状态", required = true)
+            @PathVariable Integer isChecked,
+
+            HttpServletRequest request
+    ) {
+        String oneOfUserId = "";
+        String userId = AuthContextHolder.getUserId(request);
+        if (StringUtils.isEmpty(userId)) {
+            // 用户未登录,使用临时用户
+            oneOfUserId = AuthContextHolder.getUserTempId(request);
+        } else {
+            oneOfUserId = userId;
+        }
+        cartInfoService.checkCart(oneOfUserId, skuId, isChecked);
+        return RetVal.ok();
     }
 
 

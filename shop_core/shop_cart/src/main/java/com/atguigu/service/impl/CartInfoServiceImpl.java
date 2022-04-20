@@ -9,6 +9,7 @@ import com.atguigu.service.CartInfoService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import jodd.util.StringUtil;
+import org.springframework.data.redis.core.BoundHashOperations;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -117,6 +118,45 @@ public class CartInfoServiceImpl extends ServiceImpl<CartInfoMapper, CartInfo> i
             }
         }
         return cartInfoList;
+    }
+
+    /**
+     * 修改购物车勾选状态
+     *
+     * @param oneOfUserId 用户id或临时用户id
+     * @param skuId       商品skuId
+     * @param isChecked   商品勾选状态
+     */
+    @Override
+    public void checkCart(String oneOfUserId, Long skuId, Integer isChecked) {
+        // 1. 从Redis中获取数据
+        String userCartKey = getUserCartKey(oneOfUserId);
+        BoundHashOperations boundHashOperations = redisTemplate.boundHashOps(userCartKey);
+        if (boundHashOperations.hasKey(skuId.toString())) {
+            CartInfo redisCartInfo = (CartInfo) boundHashOperations.get(skuId.toString());
+            redisCartInfo.setIsChecked(isChecked);
+            redisTemplate.boundHashOps(userCartKey).put(skuId.toString(), redisCartInfo);
+            // 设置过期时间
+            setCartKeyExpire(userCartKey);
+        }
+        // 2. 从数据库中获取数据进行修改
+        checkDbCart(oneOfUserId, skuId, isChecked);
+    }
+
+    /**
+     * 从缓存中获取数据并进行修改
+     *
+     * @param oneOfUserId 用户id或临时用户id
+     * @param skuId       商品skuId
+     * @param isChecked   商品勾选状态
+     */
+    private void checkDbCart(String oneOfUserId, Long skuId, Integer isChecked) {
+        CartInfo cartInfo = new CartInfo();
+        cartInfo.setIsChecked(isChecked);
+        QueryWrapper<CartInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("user_id", oneOfUserId);
+        wrapper.eq("sku_id", skuId);
+        baseMapper.update(cartInfo, wrapper);
     }
 
     /**

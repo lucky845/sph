@@ -31,4 +31,13 @@ public interface CartInfoService extends IService<CartInfo> {
      * @param userTempId 用户临时id
      */
     List<CartInfo> getCartList(String userId, String userTempId);
+
+    /**
+     * 修改商品的勾选状态
+     *
+     * @param oneOfUserId 用户id或临时用户id
+     * @param skuId       商品skuId
+     * @param isChecked   勾选状态
+     */
+    void checkCart(String oneOfUserId, Long skuId, Integer isChecked);
 }
