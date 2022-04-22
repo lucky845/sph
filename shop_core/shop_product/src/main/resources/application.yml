@@ -34,12 +34,60 @@ spring:
     timeout: 1800000
 
   # 数据库配制
-  datasource:
-    type: com.zaxxer.hikari.HikariDataSource
-    driver-class-name: com.mysql.jdbc.Driver
-    url: jdbc:mysql://192.168.229.128:3306/shop_product?characterEncoding=utf-8&useSSL=false
-    username: root
-    password: root
+  #  datasource:
+  #    type: com.zaxxer.hikari.HikariDataSource
+  #    driver-class-name: com.mysql.jdbc.Driver
+  #    url: jdbc:mysql://192.168.229.128:3306/shop_product?characterEncoding=utf-8&useSSL=false
+  #    username: root
+  #    password: root
+
+  # 读写分离配制
+  shardingsphere:
+    datasource:
+      # 真实数据库物理机节点名称
+      names: write-node1,read-node1,read-node2
+      # 写节点1
+      write-node1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://192.168.229.128:3306/shop_product_01?characterEncoding=utf-8&useSSL=false
+        username: root
+        password: root
+      # 读节点1
+      read-node1:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://192.168.229.128:3306/shop_product_02?characterEncoding=utf-8&useSSL=false
+        username: root
+        password: root
+      # 读节点2
+      read-node2:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        url: jdbc:mysql://192.168.229.128:3306/shop_product_03?characterEncoding=utf-8&useSSL=false
+        username: root
+        password: root
+    # 读写分离的策略
+    rules:
+      readwrite-splitting:
+        data-sources:
+          master-node:
+            type: Static
+            props:
+              # 自动发现数据源名称（与数据库发现配合使用）
+              auto-aware-data-source-name: master-node
+              # 写库数据源名称
+              write-data-source-name: write-node1
+              # 读库数据源名称，多个从数据源用逗号分隔
+              read-data-source-names: read-node1,read-node2
+            # 负载均衡算法名称
+            loadBalancerName: read-lb
+        # 负载均衡算法配置
+        loadBalancers:
+          # 负载均衡算法名称
+          read-lb:
+            # 负载均衡算法类型(轮询)
+            type: ROUND_ROBIN
 
   # 日期格式化
   jackson:
