@@ -3,6 +3,7 @@ package com.atguigu.service.impl;
 import com.atguigu.client.CartFeignClient;
 import com.atguigu.client.ProductFeignClient;
 import com.atguigu.client.UserFeignClient;
+import com.atguigu.constant.MqConst;
 import com.atguigu.constant.RedisConst;
 import com.atguigu.entity.CartInfo;
 import com.atguigu.entity.OrderDetail;
@@ -15,6 +16,8 @@ import com.atguigu.service.OrderInfoService;
 import com.atguigu.util.AuthContextHolder;
 import com.atguigu.util.HttpClientUtil;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
@@ -49,6 +52,12 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
 
     @Resource
     private ProductFeignClient productFeignClient;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
+
+    @Value("${cancel.order.delay}")
+    private Integer cancelOrderDelay;
 
     /**
      * 订单确认接口
@@ -183,6 +192,15 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
             }
             orderDetailService.saveBatch(orderDetailList);
         }
+        // 发送延时消息,超时自动取消订单
+        rabbitTemplate.convertAndSend(
+                MqConst.CANCEL_ORDER_EXCHANGE,
+                MqConst.CANCEL_ORDER_ROUTE_KEY,
+                orderInfoId,
+                correlationDate -> {
+                    correlationDate.getMessageProperties().setDelay(cancelOrderDelay);
+                    return correlationDate;
+                });
         return orderInfoId;
     }
 

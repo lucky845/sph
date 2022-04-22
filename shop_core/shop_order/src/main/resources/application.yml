@@ -29,6 +29,9 @@ spring:
     port: 5672
     username: admin
     password: 123
+    listener:
+      simple:
+        acknowledge-mode: manual
 
   redis:
     host: 192.168.229.128
