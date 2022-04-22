@@ -133,7 +133,7 @@ public class SkuController {
         skuInfo.setIsSale(1);
         skuInfoService.updateById(skuInfo);
         // es上架(使用RabbitMQ)
-        rabbitTemplate.convertSendAndReceive(MqConst.ON_OFF_SALE_EXCHANGE, MqConst.ON_SALE_ROUTING_KEY, skuId);
+        rabbitTemplate.convertAndSend(MqConst.ON_OFF_SALE_EXCHANGE, MqConst.ON_SALE_ROUTING_KEY, skuId);
         //searchFeignClient.onSale(skuId);
         return RetVal.ok();
     }
@@ -155,7 +155,7 @@ public class SkuController {
         skuInfo.setIsSale(0);
         skuInfoService.updateById(skuInfo);
         // es下架
-        rabbitTemplate.convertSendAndReceive(MqConst.ON_OFF_SALE_EXCHANGE, MqConst.OFF_SALE_ROUTING_KEY, skuId);
+        rabbitTemplate.convertAndSend(MqConst.ON_OFF_SALE_EXCHANGE, MqConst.OFF_SALE_ROUTING_KEY, skuId);
 //        searchFeignClient.offSale(skuId);
         return RetVal.ok();
     }
