@@ -13,4 +13,10 @@ import com.baomidou.mybatisplus.extension.service.IService;
  */
 public interface PaymentInfoService extends IService<PaymentInfo> {
 
+    /**
+     * 返回支付二维码页面信息
+     *
+     * @param orderId 订单id
+     */
+    String createQrCode(Long orderId) throws Exception;
 }
