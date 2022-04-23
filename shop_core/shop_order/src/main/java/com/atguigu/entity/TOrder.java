@@ -1,6 +1,7 @@
 package com.atguigu.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import io.swagger.annotations.ApiModel;
@@ -9,6 +10,7 @@ import lombok.EqualsAndHashCode;
 import lombok.experimental.Accessors;
 
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -37,6 +39,9 @@ public class TOrder implements Serializable {
     private Long userId;
 
     private String orderStatus;
+
+    @TableField(exist = false)
+    private List<TOrderDetail> orderDetailList;
 
 
 }

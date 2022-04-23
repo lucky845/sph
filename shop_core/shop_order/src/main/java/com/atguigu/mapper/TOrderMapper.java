@@ -2,6 +2,9 @@ package com.atguigu.mapper;
 
 import com.atguigu.entity.TOrder;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import org.apache.ibatis.annotations.Param;
+
+import java.util.List;
 
 /**
  * <p>
@@ -13,4 +16,5 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  */
 public interface TOrderMapper extends BaseMapper<TOrder> {
 
+    List<TOrder> queryOrderByUserId(@Param("userId") long userId);
 }

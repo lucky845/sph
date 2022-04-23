@@ -2,4 +2,26 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.atguigu.mapper.TOrderMapper">
 
+    <!--构造一个map 平台属性key与value的对应关系 1-n-->
+    <resultMap id="orderMap" type="com.atguigu.entity.TOrder" autoMapping="true">
+        <id property="id" column="id"/>
+        <!--collection代表多的一方-->
+        <collection property="orderDetailList" ofType="com.atguigu.entity.TOrderDetail" autoMapping="true">
+            <!--映射id字段-->
+            <id property="id" column="order_detail_id"/>
+        </collection>
+    </resultMap>
+    <select id="queryOrderByUserId" resultMap="orderMap">
+        SELECT a.*,
+               b.id order_detail_id,
+               b.user_id,
+               b.sku_num,
+               b.sku_name,
+               b.sku_price,
+               b.order_id
+        FROM t_order_4 a
+                 LEFT JOIN t_order_detail_4 b
+                           ON a.id = b.order_id
+        WHERE a.user_id = #{userId}
+    </select>
 </mapper>
