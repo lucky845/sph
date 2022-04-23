@@ -32,5 +32,13 @@ public class WebPaymentController {
         return "payment/pay";
     }
 
+    /**
+     * 跳转到支付成功页面(同步通知)
+     */
+    @GetMapping("/alipay/success.html")
+    public String success() {
+        return "payment/success";
+    }
+
 }
 
