@@ -1,0 +1,55 @@
+server:
+  port: 8004
+
+mybatis-plus:
+  mapper-locations: classpath:com/atguigu/mapper/xml/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+feign:
+  sentinel:
+    enabled: true
+  client:
+    config:
+      default:
+        readTimeout: 3000
+        connectTimeout: 1000
+
+spring:
+  application:
+    name: shop-order
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.229.128:8848
+
+  rabbitmq:
+    host: 192.168.229.128
+    port: 5672
+    username: admin
+    password: 123
+    listener:
+      simple:
+        acknowledge-mode: manual
+
+  redis:
+    host: 192.168.229.128
+    port: 6389
+    database: 0
+    timeout: 1800000
+
+  datasource:
+    type: com.zaxxer.hikari.HikariDataSource
+    driver-class-name: com.mysql.jdbc.Driver
+    url: jdbc:mysql://192.168.229.128:3306/shop_order?characterEncoding=utf-8&useSSL=false
+    username: root
+    password: root
+
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+
+cancel:
+  order:
+    delay: 30000

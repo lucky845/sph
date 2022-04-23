@@ -37,7 +37,7 @@ public class CodeGenerator {
 
         // 3、数据源配置
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
-        dataSourceConfig.setUrl("jdbc:mysql://192.168.229.128:3306/shop_order?serverTimezone=GMT%2B8&useSSL=false");
+        dataSourceConfig.setUrl("jdbc:mysql://192.168.229.128:3306/db_order_1?serverTimezone=GMT%2B8&useSSL=false");
         dataSourceConfig.setDriverName("com.mysql.jdbc.Driver");
         dataSourceConfig.setUsername("root");
         dataSourceConfig.setPassword("root");
@@ -65,6 +65,7 @@ public class CodeGenerator {
 //        strategy.setInclude("user_info","user_address");
 //        strategy.setInclude("cart_info");
 //        strategy.setInclude("order_detail","order_info","payment_info");
+//        strategy.setInclude("t_order_detail_1","t_order_1");
         //strategy.setInclude("seckill_product");
         strategy.setNaming(NamingStrategy.underline_to_camel);//数据库表映射到实体的命名策略
         strategy.setTablePrefix(packageConfig.getModuleName() + "_"); //生成实体时去掉表前缀
