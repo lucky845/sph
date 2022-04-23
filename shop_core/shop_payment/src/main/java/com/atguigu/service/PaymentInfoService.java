@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
  * </p>
  *
  * @author lucky845
- * @since 2022-04-20
+ * @since 2022-04-23
  */
 public interface PaymentInfoService extends IService<PaymentInfo> {
 

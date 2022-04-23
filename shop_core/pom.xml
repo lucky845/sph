@@ -18,6 +18,7 @@
         <module>shop_user</module>
         <module>shop_cart</module>
         <module>shop_order</module>
+        <module>shop_payment</module>
     </modules>
 
     <properties>

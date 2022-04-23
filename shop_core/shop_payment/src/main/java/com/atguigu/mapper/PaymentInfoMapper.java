@@ -9,7 +9,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
  * </p>
  *
  * @author lucky845
- * @since 2022-04-20
+ * @since 2022-04-23
  */
 public interface PaymentInfoMapper extends BaseMapper<PaymentInfo> {
 
