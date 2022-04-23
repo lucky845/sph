@@ -15,6 +15,7 @@ import com.atguigu.service.OrderDetailService;
 import com.atguigu.service.OrderInfoService;
 import com.atguigu.util.AuthContextHolder;
 import com.atguigu.util.HttpClientUtil;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Value;
@@ -204,4 +205,20 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
         return orderInfoId;
     }
 
+    /**
+     * 获取订单信息
+     *
+     * @param orderId 订单id
+     */
+    @Override
+    public OrderInfo getOrderInfo(Long orderId) {
+        OrderInfo orderInfo = baseMapper.selectById(orderId);
+        if (orderInfo != null) {
+            QueryWrapper<OrderDetail> wrapper = new QueryWrapper<>();
+            wrapper.eq("order_id", orderId);
+            List<OrderDetail> orderDetailList = orderDetailService.list(wrapper);
+            orderInfo.setOrderDetailList(orderDetailList);
+        }
+        return orderInfo;
+    }
 }

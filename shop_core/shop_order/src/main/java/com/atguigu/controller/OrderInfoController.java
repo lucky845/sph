@@ -81,5 +81,19 @@ public class OrderInfoController {
         return RetVal.ok(orderId);
     }
 
+    /**
+     * 获取订单信息
+     *
+     * @param orderId 订单id
+     */
+    @ApiOperation("获取订单信息")
+    @GetMapping("/getOrderInfo/{orderId}")
+    public OrderInfo getOrderInfo(
+            @ApiParam(name = "orderId", value = "订单id", required = true)
+            @PathVariable Long orderId
+    ) {
+        return orderInfoService.getOrderInfo(orderId);
+    }
+
 }
 

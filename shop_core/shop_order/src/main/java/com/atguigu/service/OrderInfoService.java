@@ -37,4 +37,11 @@ public interface OrderInfoService extends IService<OrderInfo> {
      * @param orderInfo 订单信息
      */
     String checkStockAndPrice(String userId, OrderInfo orderInfo);
+
+    /**
+     * 获取订单信息
+     *
+     * @param orderId 订单id
+     */
+    OrderInfo getOrderInfo(Long orderId);
 }
