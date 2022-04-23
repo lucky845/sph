@@ -5,11 +5,10 @@ import com.atguigu.service.PaymentInfoService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
+import java.util.Map;
 
 /**
  * <p>
@@ -41,6 +40,18 @@ public class PaymentInfoController {
         return paymentInfoService.createQrCode(orderId);
     }
 
+    /**
+     * 支付宝异步调用
+     *
+     * @param paramMap 支付宝返回的参数
+     */
+    @ApiOperation("支付宝异步调用接口")
+    @PostMapping("/async/notify")
+    public String asyncNotify(@RequestParam Map<String, String> paramMap) throws Exception {
+
+        return "";
+        //return "success";
+    }
 
 }
 

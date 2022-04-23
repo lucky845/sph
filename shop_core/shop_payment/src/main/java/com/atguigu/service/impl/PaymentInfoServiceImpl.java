@@ -1,9 +1,9 @@
 package com.atguigu.service.impl;
 
-import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayClient;
-import com.alipay.api.request.AlipayCommerceTradeApplyRequest;
-import com.alipay.api.response.AlipayCommerceTradeApplyResponse;
+import com.alipay.api.request.AlipayTradePagePayRequest;
+import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.atguigu.client.OrderFeignClient;
 import com.atguigu.config.AlipayConfig;
 import com.atguigu.entity.OrderInfo;
@@ -19,7 +19,6 @@ import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
-import java.util.HashMap;
 
 /**
  * <p>
@@ -49,21 +48,22 @@ public class PaymentInfoServiceImpl extends ServiceImpl<PaymentInfoMapper, Payme
         OrderInfo orderInfo = orderFeignClient.getOrderInfo(orderId);
         // 保存支付信息
         savePaymentInfo(orderInfo, PaymentType.ALIPAY.name());
-        AlipayCommerceTradeApplyRequest alipayRequest = new AlipayCommerceTradeApplyRequest();
+        AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();
         // 设置同步回调地址
-        alipayRequest.setReturnUrl(AlipayConfig.return_payment_url);
+        request.setReturnUrl(AlipayConfig.return_payment_url);
         // 设置异步回调地址
-        alipayRequest.setNotifyUrl(AlipayConfig.notify_payment_url);
+        request.setNotifyUrl(AlipayConfig.notify_payment_url);
         // 在公共参数中设置回跳和通知地址
-        //声明一个map 集合
-        HashMap<String, Object> map = new HashMap<>();
-        map.put("out_trade_no", orderInfo.getOutTradeNo());
-        map.put("product_code", "FAST_INSTANT_TRADE_PAY");
-        map.put("total_amount", orderInfo.getTotalMoney());
-        map.put("subject", "太热了，买个空调凉快凉快！");
-        alipayRequest.setBizContent(JSON.toJSONString(map));
-        // 返回页面要输出的内容,调用SDK生成表单
-        AlipayCommerceTradeApplyResponse response = alipayClient.pageExecute(alipayRequest);
+        JSONObject bizContent = new JSONObject();
+        //商户订单号
+        bizContent.put("out_trade_no", orderInfo.getOutTradeNo());
+        //订单总金额
+        bizContent.put("total_amount", orderInfo.getTotalMoney());
+        //订单标题
+        bizContent.put("subject", "天气转热 买个锤子手机");
+        bizContent.put("product_code", "FAST_INSTANT_TRADE_PAY");
+        request.setBizContent(bizContent.toString());
+        AlipayTradePagePayResponse response = alipayClient.pageExecute(request);
         if (response.isSuccess()) {
             log.info("调用支付成功");
             return response.getBody();

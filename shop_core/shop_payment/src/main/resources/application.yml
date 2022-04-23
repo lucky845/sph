@@ -54,4 +54,4 @@ alipay_public_key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkWs+3gXMosiWG+Ebf
 # 同步回调地址 跳转到支付成功页面
 return_payment_url: http://payment.gmall.com/alipay/success.html
 # 异步回调地址
-notify_payment_url: http://enjoy6288.free.idcfengye.com/payment/async/notify
+notify_payment_url: http://r4xx93.natappfree.cc/payment/async/notify
