@@ -19,8 +19,8 @@
                b.sku_name,
                b.sku_price,
                b.order_id
-        FROM t_order_4 a
-                 LEFT JOIN t_order_detail_4 b
+        FROM t_order a
+                 LEFT JOIN t_order_detail b
                            ON a.id = b.order_id
         WHERE a.user_id = #{userId}
     </select>
