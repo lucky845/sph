@@ -95,5 +95,16 @@ public class OrderInfoController {
         return orderInfoService.getOrderInfo(orderId);
     }
 
+    /**
+     * 拆单
+     *
+     * @param orderId                 订单id
+     * @param wareHouseIdSkuIdMapJson 库存id和商品skuid的map的json字符串
+     */
+    @PostMapping("/splitOrder")
+    public String splitOrder(@RequestParam Long orderId, @RequestParam String wareHouseIdSkuIdMapJson) {
+        return orderInfoService.splitOrder(orderId, wareHouseIdSkuIdMapJson);
+    }
+
 }
 

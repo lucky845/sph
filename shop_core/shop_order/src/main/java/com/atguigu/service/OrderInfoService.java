@@ -1,6 +1,7 @@
 package com.atguigu.service;
 
 import com.atguigu.entity.OrderInfo;
+import com.atguigu.enums.ProcessStatus;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -44,4 +45,28 @@ public interface OrderInfoService extends IService<OrderInfo> {
      * @param orderId 订单id
      */
     OrderInfo getOrderInfo(Long orderId);
+
+    /**
+     * 修改订单状态
+     *
+     * @param orderInfo     订单信息
+     * @param processStatus 订单支付状态
+     */
+    void updateOrderStatus(OrderInfo orderInfo, ProcessStatus processStatus);
+
+    /**
+     * 发送消息通知仓库系统减库存
+     *
+     * @param orderInfo 订单信息
+     */
+    void sendMsgToWareHouse(OrderInfo orderInfo);
+
+    /**
+     * 拆单
+     *
+     * @param orderId                 订单id
+     * @param wareHouseIdSkuIdMapJson 库存id和商品skuid的map的json字符串
+     */
+    String splitOrder(Long orderId, String wareHouseIdSkuIdMapJson);
+
 }

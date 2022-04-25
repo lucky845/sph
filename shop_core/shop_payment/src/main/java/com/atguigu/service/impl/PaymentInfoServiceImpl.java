@@ -6,6 +6,7 @@ import com.alipay.api.request.AlipayTradePagePayRequest;
 import com.alipay.api.response.AlipayTradePagePayResponse;
 import com.atguigu.client.OrderFeignClient;
 import com.atguigu.config.AlipayConfig;
+import com.atguigu.constant.MqConst;
 import com.atguigu.entity.OrderInfo;
 import com.atguigu.entity.PaymentInfo;
 import com.atguigu.enums.PaymentStatus;
@@ -15,10 +16,12 @@ import com.atguigu.service.PaymentInfoService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
 import java.util.Date;
+import java.util.Map;
 
 /**
  * <p>
@@ -37,6 +40,9 @@ public class PaymentInfoServiceImpl extends ServiceImpl<PaymentInfoMapper, Payme
 
     @Resource
     private AlipayClient alipayClient;
+
+    @Resource
+    private RabbitTemplate rabbitTemplate;
 
     /**
      * 返回支付二维码页面信息
@@ -98,5 +104,39 @@ public class PaymentInfoServiceImpl extends ServiceImpl<PaymentInfoMapper, Payme
         paymentInfo.setPaymentStatus(PaymentStatus.UNPAID.name());
         paymentInfo.setCreateTime(new Date());
         baseMapper.insert(paymentInfo);
+    }
+
+    /**
+     * 查询支付信息
+     *
+     * @param outTradeNo 订单流水号
+     */
+    @Override
+    public PaymentInfo getPaymentInfo(String outTradeNo) {
+        QueryWrapper<PaymentInfo> wrapper = new QueryWrapper<>();
+        wrapper.eq("out_trade_no", outTradeNo);
+        wrapper.eq("payment_type", PaymentType.ALIPAY.name());
+        return baseMapper.selectOne(wrapper);
+    }
+
+    /**
+     * 修改支付表信息
+     *
+     * @param paramMap 支付宝返回的参数
+     */
+    @Override
+    public void updatePaymentInfo(Map<String, String> paramMap) {
+        String outTradeNo = paramMap.get("out_trade_no");
+        PaymentInfo paymentInfo = getPaymentInfo(outTradeNo);
+        // 修改支付表信息
+        paymentInfo.setPaymentStatus(PaymentStatus.PAID.name());
+        paymentInfo.setCallbackTime(new Date());
+        paymentInfo.setCallbackContent(paramMap.toString());
+        // 支付宝返回的订单号
+        String tradeNo = paramMap.get("trade_no");
+        paymentInfo.setTradeNo(tradeNo);
+        baseMapper.updateById(paymentInfo);
+        // 使用RabbitMq,发送消息给shop-order模块,修改订单状态
+        rabbitTemplate.convertAndSend(MqConst.PAY_ORDER_EXCHANGE, MqConst.PAY_ORDER_ROUTE_KEY, paymentInfo.getOrderId());
     }
 }

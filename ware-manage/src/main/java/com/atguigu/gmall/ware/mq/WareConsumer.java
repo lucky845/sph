@@ -41,10 +41,6 @@ public class WareConsumer {
 
     /**
      * 支付成功扣减库存
-     *
-     * @param message
-     * @param channel
-     * @throws IOException
      */
     @RabbitListener(bindings = @QueueBinding(
             value = @Queue(value = MqConst.DECREASE_STOCK_QUEUE, durable = "false"),

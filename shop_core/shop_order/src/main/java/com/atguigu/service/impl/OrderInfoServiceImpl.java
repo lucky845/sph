@@ -1,5 +1,6 @@
 package com.atguigu.service.impl;
 
+import com.alibaba.fastjson.JSON;
 import com.atguigu.client.CartFeignClient;
 import com.atguigu.client.ProductFeignClient;
 import com.atguigu.client.UserFeignClient;
@@ -17,7 +18,9 @@ import com.atguigu.util.AuthContextHolder;
 import com.atguigu.util.HttpClientUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import jodd.util.StringUtil;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -220,5 +223,123 @@ public class OrderInfoServiceImpl extends ServiceImpl<OrderInfoMapper, OrderInfo
             orderInfo.setOrderDetailList(orderDetailList);
         }
         return orderInfo;
+    }
+
+    /**
+     * 修改订单状态
+     *
+     * @param orderInfo     订单信息
+     * @param processStatus 订单支付状态
+     */
+    @Override
+    public void updateOrderStatus(OrderInfo orderInfo, ProcessStatus processStatus) {
+        orderInfo.setOrderStatus(processStatus.getOrderStatus().name());
+        orderInfo.setProcessStatus(processStatus.name());
+        baseMapper.updateById(orderInfo);
+    }
+
+    /**
+     * 发送消息通知仓库系统减库存
+     *
+     * @param orderInfo 订单信息
+     */
+    @Override
+    public void sendMsgToWareHouse(OrderInfo orderInfo) {
+        // 1. 修改订单状态为已通知仓库
+        updateOrderStatus(orderInfo, ProcessStatus.NOTIFIED_WARE);
+        // 2. 把数据封装为json格式
+        Map<String, Object> dataMap = assembleWareHouseData(orderInfo);
+        String dataMapJson = JSON.toJSONString(dataMap);
+        // 3. 发送消息给仓库系统
+        rabbitTemplate.convertAndSend(MqConst.DECREASE_STOCK_EXCHANGE, MqConst.DECREASE_STOCK_ROUTE_KEY, dataMapJson);
+    }
+
+    /**
+     * 将数据封装为map
+     *
+     * @param orderInfo 订单信息
+     */
+    private Map<String, Object> assembleWareHouseData(OrderInfo orderInfo) {
+        // 构建一个map封装数据
+        HashMap<String, Object> dataMap = new HashMap<>();
+        dataMap.put("orderId", orderInfo.getId());
+        dataMap.put("consignee", orderInfo.getConsignee());
+        dataMap.put("consigneeTel", orderInfo.getConsigneeTel());
+        dataMap.put("orderComment", orderInfo.getOrderComment());
+        dataMap.put("orderBody", orderInfo.getTradeBody());
+        dataMap.put("deliveryAddress", orderInfo.getDeliveryAddress());
+        dataMap.put("paymentWay", 2);
+        // 仓库id 减库存拆单时使用
+        if (!StringUtil.isEmpty(orderInfo.getWareHouseId())) {
+            dataMap.put("wareId", orderInfo.getWareHouseId());
+        }
+        // 封装订单信息集合
+        List<Map<String, Object>> orderDetailMapList = new ArrayList<>();
+        List<OrderDetail> orderDetailList = orderInfo.getOrderDetailList();
+        for (OrderDetail orderDetail : orderDetailList) {
+            HashMap<String, Object> skuInfo = new HashMap<>();
+            skuInfo.put("skuId", orderDetail.getSkuId());
+            skuInfo.put("skuNum", orderDetail.getSkuNum());
+            skuInfo.put("skuName", orderDetail.getSkuName());
+            // 完成数据组装
+            orderDetailMapList.add(skuInfo);
+        }
+        dataMap.put("details", orderDetailMapList);
+        return dataMap;
+    }
+
+    /**
+     * 拆单
+     *
+     * @param orderId                 订单id
+     * @param wareHouseIdSkuIdMapJson 库存id和商品skuid的map的json字符串
+     */
+    @Override
+    public String splitOrder(Long orderId, String wareHouseIdSkuIdMapJson) {
+        List<Map<String, Object>> assembleWareHouseDataList = new ArrayList<>();
+        // 1. 获取原始订单
+        OrderInfo parentOrderInfo = getOrderInfo(orderId);
+        // 把json字符串转换为list集合
+        List<Map> wareHouseIdSkuIdMapList = JSON.parseArray(wareHouseIdSkuIdMapJson, Map.class);
+        for (Map wareHouseIdSkuIdMap : wareHouseIdSkuIdMapList) {
+            String wareHouseId = (String) wareHouseIdSkuIdMap.get("wareHouseId");
+            List<String> skuIdList = (List<String>) wareHouseIdSkuIdMap.get("skuIdList");
+            // 2. 设置子订单信息并保存
+            OrderInfo childOrderInfo = new OrderInfo();
+            BeanUtils.copyProperties(parentOrderInfo, childOrderInfo);
+            childOrderInfo.setId(null);
+            // 把原始订单id设置为子订单的父订单
+            childOrderInfo.setParentOrderId(orderId);
+            // 设置子订单的仓库
+            childOrderInfo.setWareHouseId(wareHouseId);
+            // 3. 设置子订单详情
+            List<OrderDetail> parentOrderDetailList = parentOrderInfo.getOrderDetailList();
+            List<OrderDetail> childOrderDetailList = new ArrayList<>();
+            BigDecimal childTotalMoney = new BigDecimal(0);
+            for (OrderDetail parentOrderDetail : parentOrderDetailList) {
+                for (String skuId : skuIdList) {
+                    // 如果该原始订单详情属于该订单信息
+                    if (Long.parseLong(skuId) == parentOrderDetail.getSkuId()) {
+                        // 把该原始订单详情信息放入子订单详情信息中
+                        childOrderDetailList.add(parentOrderDetail);
+                        // 设置子订单的金额
+                        BigDecimal orderPrice = parentOrderDetail.getOrderPrice();
+                        String skuNum = parentOrderDetail.getSkuNum();
+                        childTotalMoney = childTotalMoney.add(orderPrice.multiply(new BigDecimal(skuNum)));
+                    }
+                }
+            }
+            childOrderInfo.setOrderDetailList(childOrderDetailList);
+            childOrderInfo.setTotalMoney(childTotalMoney);
+            // 保存子订单信息
+            saveOrderAndDetail(childOrderInfo);
+            // 添加子订单到集合中
+            Map<String, Object> childOrderInfoMap = assembleWareHouseData(childOrderInfo);
+            assembleWareHouseDataList.add(childOrderInfoMap);
+        }
+        // 4. 修改原始订单状态为split
+        updateOrderStatus(parentOrderInfo, ProcessStatus.SPLIT);
+        // 5. 返回信息给库存系统
+        return JSON.toJSONString(assembleWareHouseDataList);
     }
 }
