@@ -19,6 +19,7 @@
         <module>shop_cart</module>
         <module>shop_order</module>
         <module>shop_payment</module>
+        <module>shop_seckill</module>
     </modules>
 
     <properties>
