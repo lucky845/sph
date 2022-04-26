@@ -35,4 +35,25 @@ public interface PaymentInfoService extends IService<PaymentInfo> {
      * @param paramMap 支付宝返回的参数
      */
     void updatePaymentInfo(Map<String, String> paramMap);
+
+    /**
+     * 支付宝退款接口
+     *
+     * @param orderId 订单号
+     */
+    boolean refund(Long orderId) throws Exception;
+
+    /**
+     * 查询支付宝中是否有记录
+     *
+     * @param orderId 订单id
+     */
+    boolean queryAlipayTrade(Long orderId) throws Exception;
+
+    /**
+     * 交易关闭
+     *
+     * @param orderId 订单id
+     */
+    boolean closeAlipayTrade(Long orderId) throws Exception;
 }

@@ -76,5 +76,54 @@ public class PaymentInfoController {
         return "failure";
     }
 
+    /**
+     * 支付宝退款接口
+     *
+     * @param orderId 订单号
+     */
+    @GetMapping("/refund/{orderId}")
+    public boolean refund(
+            @ApiParam(name = "orderId", value = "订单id", required = true)
+            @PathVariable Long orderId
+    ) throws Exception {
+        return paymentInfoService.refund(orderId);
+    }
+
+    /**
+     * 查询支付宝中是否有记录
+     *
+     * @param orderId 订单id
+     */
+    @GetMapping("/queryAlipayTrade/{orderId}")
+    public boolean queryAlipayTrade(
+            @ApiParam(name = "orderId", value = "订单id", required = true)
+            @PathVariable Long orderId
+    ) throws Exception {
+        return paymentInfoService.queryAlipayTrade(orderId);
+    }
+
+    /**
+     * 交易关闭
+     *
+     * @param orderId 订单id
+     */
+    @GetMapping("/closeAlipayTrade/{orderId}")
+    public boolean closeAlipayTrade(
+            @ApiParam(name = "orderId", value = "订单id", required = true)
+            @PathVariable Long orderId
+    ) throws Exception {
+        return paymentInfoService.closeAlipayTrade(orderId);
+    }
+
+    /**
+     * 根据outTradeNo查询支付表信息
+     *
+     * @param outTradeNo 订单流水号
+     */
+    @GetMapping("/getPaymentInfo/{outTradeNo}")
+    public PaymentInfo getPaymentInfo(@PathVariable String outTradeNo) {
+        return paymentInfoService.getPaymentInfo(outTradeNo);
+    }
+
 }
 

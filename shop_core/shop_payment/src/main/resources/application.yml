@@ -29,6 +29,9 @@ spring:
     port: 5672
     username: admin
     password: 123
+    listener:
+      simple:
+        acknowledge-mode: manual
 
   redis:
     host: 192.168.229.128
@@ -54,4 +57,4 @@ alipay_public_key: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAkWs+3gXMosiWG+Ebf
 # 同步回调地址 跳转到支付成功页面
 return_payment_url: http://payment.gmall.com/alipay/success.html
 # 异步回调地址(每次重新启动都会变化,需要重新设置)
-notify_payment_url: http://kzumnb.natappfree.cc/payment/async/notify
+notify_payment_url: http://c8behx.natappfree.cc/payment/async/notify

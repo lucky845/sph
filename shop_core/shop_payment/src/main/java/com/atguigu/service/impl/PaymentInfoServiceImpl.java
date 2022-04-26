@@ -2,8 +2,14 @@ package com.atguigu.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alipay.api.AlipayClient;
+import com.alipay.api.request.AlipayTradeCloseRequest;
 import com.alipay.api.request.AlipayTradePagePayRequest;
+import com.alipay.api.request.AlipayTradeQueryRequest;
+import com.alipay.api.request.AlipayTradeRefundRequest;
+import com.alipay.api.response.AlipayTradeCloseResponse;
 import com.alipay.api.response.AlipayTradePagePayResponse;
+import com.alipay.api.response.AlipayTradeQueryResponse;
+import com.alipay.api.response.AlipayTradeRefundResponse;
 import com.atguigu.client.OrderFeignClient;
 import com.atguigu.config.AlipayConfig;
 import com.atguigu.constant.MqConst;
@@ -11,6 +17,7 @@ import com.atguigu.entity.OrderInfo;
 import com.atguigu.entity.PaymentInfo;
 import com.atguigu.enums.PaymentStatus;
 import com.atguigu.enums.PaymentType;
+import com.atguigu.enums.ProcessStatus;
 import com.atguigu.mapper.PaymentInfoMapper;
 import com.atguigu.service.PaymentInfoService;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
@@ -138,5 +145,63 @@ public class PaymentInfoServiceImpl extends ServiceImpl<PaymentInfoMapper, Payme
         baseMapper.updateById(paymentInfo);
         // 使用RabbitMq,发送消息给shop-order模块,修改订单状态
         rabbitTemplate.convertAndSend(MqConst.PAY_ORDER_EXCHANGE, MqConst.PAY_ORDER_ROUTE_KEY, paymentInfo.getOrderId());
+    }
+
+    /**
+     * 支付宝退款接口
+     *
+     * @param orderId 订单号
+     */
+    @Override
+    public boolean refund(Long orderId) throws Exception {
+        AlipayTradeRefundRequest request = new AlipayTradeRefundRequest();
+        OrderInfo orderInfo = orderFeignClient.getOrderInfo(orderId);
+        JSONObject bizContent = new JSONObject();
+        bizContent.put("out_trade_no", orderInfo.getOutTradeNo());
+        bizContent.put("refund_amount", orderInfo.getTotalMoney());
+        bizContent.put("refund_reason", "买的东西不行");
+        request.setBizContent(bizContent.toString());
+        AlipayTradeRefundResponse response = alipayClient.execute(request);
+        if (response.isSuccess()) {
+            // 如果支付宝记录已经关闭 那么我们的支付订单改为已关闭
+            PaymentInfo paymentInfo = getPaymentInfo(orderInfo.getOutTradeNo());
+            paymentInfo.setPaymentStatus(ProcessStatus.CLOSED.name());
+            baseMapper.updateById(paymentInfo);
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * 查询支付宝中是否有记录
+     *
+     * @param orderId 订单id
+     */
+    @Override
+    public boolean queryAlipayTrade(Long orderId) throws Exception {
+        OrderInfo orderInfo = orderFeignClient.getOrderInfo(orderId);
+        AlipayTradeQueryRequest request = new AlipayTradeQueryRequest();
+        JSONObject bizContent = new JSONObject();
+        bizContent.put("out_trade_no", orderInfo.getOutTradeNo());
+        request.setBizContent(bizContent.toString());
+        AlipayTradeQueryResponse response = alipayClient.execute(request);
+        return response.isSuccess();
+    }
+
+    /**
+     * 交易关闭
+     *
+     * @param orderId 订单id
+     */
+    @Override
+    public boolean closeAlipayTrade(Long orderId) throws Exception {
+        OrderInfo orderInfo = orderFeignClient.getOrderInfo(orderId);
+        AlipayTradeCloseRequest request = new AlipayTradeCloseRequest();
+        JSONObject bizContent = new JSONObject();
+        bizContent.put("out_trade_no", orderInfo.getOutTradeNo());
+        request.setBizContent(bizContent.toString());
+        AlipayTradeCloseResponse response = alipayClient.execute(request);
+        return response.isSuccess();
     }
 }
