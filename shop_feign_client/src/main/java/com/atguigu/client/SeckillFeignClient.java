@@ -26,4 +26,10 @@ public interface SeckillFeignClient {
     @GetMapping("/seckill/getSeckillProductBySkuId/{skuId}")
     public RetVal<SeckillProduct> getSeckillProductBySkuId(@PathVariable Long skuId);
 
+    /**
+     * 返回秒杀确认页面需要的数据
+     */
+    @GetMapping("/seckill/seckillConfirm")
+    public RetVal seckillConfirm();
+
 }

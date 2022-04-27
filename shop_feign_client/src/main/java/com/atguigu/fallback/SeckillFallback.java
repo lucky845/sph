@@ -29,4 +29,12 @@ public class SeckillFallback implements SeckillFeignClient {
     public RetVal<SeckillProduct> getSeckillProductBySkuId(Long skuId) {
         return RetVal.ok();
     }
+
+    /**
+     * 返回秒杀确认页面需要的数据
+     */
+    @Override
+    public RetVal seckillConfirm() {
+        return RetVal.ok();
+    }
 }

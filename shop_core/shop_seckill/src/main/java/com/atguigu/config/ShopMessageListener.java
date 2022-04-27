@@ -1,5 +1,6 @@
 package com.atguigu.config;
 
+import com.atguigu.constant.RedisConst;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
@@ -13,7 +14,7 @@ import javax.annotation.Resource;
  */
 @Slf4j
 @Component
-public class ShopMessageReceiver {
+public class ShopMessageListener {
 
     @Resource
     private RedisTemplate<Object, Object> redisTemplate;
@@ -24,7 +25,7 @@ public class ShopMessageReceiver {
      * @param message 消息
      */
     public void receiveChannelMessage(String message) {
-        log.info("收到了redis发布的订阅消息");
+        log.info("收到了redis发布的订阅消息{}", message);
         if (!StringUtils.isEmpty(message)) {
             // 把接收到的消费者的消息进行解析并且存储标志位
             message = message.replaceAll("\"", "");
@@ -34,7 +35,7 @@ public class ShopMessageReceiver {
                 String skuIdString = messageSplit[0];
                 // 商品的状态位
                 String state = messageSplit[1];
-                redisTemplate.opsForValue().set(skuIdString, state);
+                redisTemplate.opsForValue().set(RedisConst.SECKILL_STATE_PREFIX + skuIdString, state);
             }
         }
     }

@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author lucky845
@@ -57,5 +58,20 @@ public class WebSecKillController {
         return "seckill/queue";
     }
 
+    /**
+     * 确认下单信息
+     */
+    @GetMapping("/seckill-confirm.html")
+    public String seckillConfirm(Model model, HttpServletRequest request) {
+        //在秒杀系统里面查询信息给页面提供数据
+        RetVal retVal = seckillFeignClient.seckillConfirm();
+        if (retVal.isOk()) {
+            Map<String, Object> retMap = (Map<String, Object>) retVal.getData();
+            model.addAllAttributes(retMap);
+        } else {
+            model.addAttribute("message", retVal.getMessage());
+        }
+        return "seckill/confirm";
+    }
 
 }
