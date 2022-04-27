@@ -26,4 +26,14 @@ public class OrderFallback implements OrderFeignClient {
     public OrderInfo getOrderInfo(Long orderId) {
         return new OrderInfo();
     }
+
+    /**
+     * 把保存订单基本信息与详情信息封装为一个接口
+     *
+     * @param orderInfo 订单信息
+     */
+    @Override
+    public Long saveOrderAndDetail(OrderInfo orderInfo) {
+        return -1L;
+    }
 }

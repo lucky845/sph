@@ -101,9 +101,29 @@ public class OrderInfoController {
      * @param orderId                 订单id
      * @param wareHouseIdSkuIdMapJson 库存id和商品skuid的map的json字符串
      */
+    @ApiOperation("拆单")
     @PostMapping("/splitOrder")
-    public String splitOrder(@RequestParam Long orderId, @RequestParam String wareHouseIdSkuIdMapJson) {
+    public String splitOrder(
+            @ApiParam(name = "orderId", value = "订单id", required = true)
+            @RequestParam Long orderId,
+
+            @ApiParam(name = "wareHouseIdSkuIdMapJson", value = "库存id和商品skuid的map的json字符串", required = true)
+            @RequestParam String wareHouseIdSkuIdMapJson) {
         return orderInfoService.splitOrder(orderId, wareHouseIdSkuIdMapJson);
+    }
+
+    /**
+     * 保存订单基本信息与详情信息
+     *
+     * @param orderInfo 订单信息
+     */
+    @ApiOperation("保存订单基本信息与详情信息")
+    @PostMapping("/saveOrderAndDetail")
+    public Long saveOrderAndDetail(
+            @ApiParam(name = "orderInfo", value = "订单信息", required = true)
+            @RequestBody OrderInfo orderInfo
+    ) {
+        return orderInfoService.saveOrderAndDetail(orderInfo);
     }
 
 }

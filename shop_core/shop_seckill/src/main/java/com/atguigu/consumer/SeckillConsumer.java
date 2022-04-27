@@ -51,8 +51,8 @@ public class SeckillConsumer {
         wrapper.eq("status", 1);
         // 剩余库存>0
         wrapper.gt("stock_count", 0);
-        // 取出开始时间应该大于当前日期
-        wrapper.le("DATE_FORMAT(start_time,'%Y-%m-%d')", DateUtil.formatDate(new Date()));
+        // 取出开始时间应该小于当前日期
+        wrapper.ge("DATE_FORMAT(start_time,'%Y-%m-%d')", DateUtil.formatDate(new Date()));
         List<SeckillProduct> seckillProductList = seckillProductService.list(wrapper);
         if (!CollectionUtils.isEmpty(seckillProductList)) {
             for (SeckillProduct seckillProduct : seckillProductList) {
@@ -82,9 +82,10 @@ public class SeckillConsumer {
             key = {MqConst.PREPARE_SECKILL_ROUTE_KEY})
     )
     public void prepareSeckill(UserSeckillSkuInfo userSeckillSkuInfo) {
-        // 开始处理预下单逻辑
-        seckillProductService.prepareSeckill(userSeckillSkuInfo);
-
+        if (userSeckillSkuInfo != null) {
+            // 开始处理预下单逻辑
+            seckillProductService.prepareSeckill(userSeckillSkuInfo);
+        }
     }
 
 }
