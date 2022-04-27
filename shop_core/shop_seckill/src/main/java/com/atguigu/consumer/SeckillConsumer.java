@@ -88,4 +88,37 @@ public class SeckillConsumer {
         }
     }
 
+    /**
+     * 秒杀结束收尾工作
+     */
+    @RabbitListener(bindings = @QueueBinding(
+            value = @Queue(value = MqConst.CLEAR_REDIS_QUEUE, durable = "false"),
+            exchange = @Exchange(value = MqConst.CLEAR_REDIS_EXCHANGE, durable = "false", autoDelete = "true"),
+            key = {MqConst.CLEAR_REDIS_ROUTE_KEY})
+    )
+    public void clearSeckill() {
+        // 1. 把小于当前时间的商品下架
+        QueryWrapper<SeckillProduct> wrapper = new QueryWrapper<>();
+        // 1为秒杀商品 2为结束 3为审核未通过
+        wrapper.eq("status", 1);
+        // 把小于等于当前时间的商品下架
+        wrapper.le("end_time", new Date());
+        List<SeckillProduct> seckillProductList = seckillProductService.list(wrapper);
+        if (!CollectionUtils.isEmpty(seckillProductList)) {
+            for (SeckillProduct seckillProduct : seckillProductList) {
+                // 需要对商品的状态进行改变,2为结束
+                seckillProduct.setStatus("2");
+                seckillProductService.updateById(seckillProduct);
+                // 2. 把即将下架的秒杀商品信息从Redis中删除
+                Long skuId = seckillProduct.getSkuId();
+                redisTemplate.delete(RedisConst.SECKILL_STATE_PREFIX + skuId);
+                redisTemplate.delete(RedisConst.SECKILL_STOCK_PREFIX + skuId);
+            }
+        }
+        // 3. 再删除其他和秒杀业务有关的Redis信息
+        redisTemplate.delete(RedisConst.SECKILL_PRODUCT);
+        redisTemplate.delete(RedisConst.BOUGHT_SECKILL_USER_ORDER);
+        redisTemplate.delete(RedisConst.PREPARE_SECKILL_USERID_SKUID);
+    }
+
 }
