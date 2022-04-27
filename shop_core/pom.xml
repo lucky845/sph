@@ -20,6 +20,7 @@
         <module>shop_order</module>
         <module>shop_payment</module>
         <module>shop_seckill</module>
+        <module>shop_quartz</module>
     </modules>
 
     <properties>

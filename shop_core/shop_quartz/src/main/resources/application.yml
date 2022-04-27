@@ -1,0 +1,21 @@
+server:
+  port: 8007
+
+spring:
+
+  rabbitmq:
+    host: 192.168.229.128
+    port: 5672
+    username: admin
+    password: 123
+
+  redis:
+    host: 192.168.229.128
+    port: 6389
+    database: 0
+    timeout: 1800000
+
+  cloud:
+    nacos:
+      discovery:
+        server-addr: 192.168.229.128:8848

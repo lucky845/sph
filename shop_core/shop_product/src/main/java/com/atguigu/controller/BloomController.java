@@ -27,7 +27,6 @@ public class BloomController {
     @Resource
     private RBloomFilter<Object> bloomFilter;
 
-    // TODO 后期加入定时任务后，对布隆过滤器进行维护
     @GetMapping("/sku/bloom")
     public String SkuBloom() {
         // 先删除之前的数据
