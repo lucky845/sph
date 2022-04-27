@@ -37,7 +37,7 @@ public class CodeGenerator {
 
         // 3、数据源配置
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
-        dataSourceConfig.setUrl("jdbc:mysql://192.168.229.128:3306/shop_seckill?serverTimezone=GMT%2B8&useSSL=false");
+        dataSourceConfig.setUrl("jdbc:mysql://120.79.10.205:3306/shop_seckill?serverTimezone=GMT%2B8&useSSL=false");
         dataSourceConfig.setDriverName("com.mysql.jdbc.Driver");
         dataSourceConfig.setUsername("root");
         dataSourceConfig.setPassword("root");

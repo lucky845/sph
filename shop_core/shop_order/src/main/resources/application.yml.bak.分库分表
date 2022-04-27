@@ -22,10 +22,10 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.229.128:8848
+        server-addr: 120.79.10.205:8848
 
   rabbitmq:
-    host: 192.168.229.128
+    host: 120.79.10.205
     port: 5672
     username: admin
     password: 123
@@ -34,7 +34,7 @@ spring:
         acknowledge-mode: manual
 
   redis:
-    host: 192.168.229.128
+    host: 120.79.10.205
     port: 6389
     database: 0
     timeout: 1800000
@@ -42,7 +42,7 @@ spring:
   #  datasource:
   #    type: com.zaxxer.hikari.HikariDataSource
   #    driver-class-name: com.mysql.jdbc.Driver
-  #    url: jdbc:mysql://192.168.229.128:3306/shop_order?characterEncoding=utf-8&useSSL=false
+  #    url: jdbc:mysql://120.79.10.205:3306/shop_order?characterEncoding=utf-8&useSSL=false
   #    username: root
   #    password: root
 
@@ -53,19 +53,19 @@ spring:
       node-1:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: com.mysql.jdbc.Driver
-        url: jdbc:mysql://192.168.229.128:3306/db_order_1?characterEncoding=utf-8&useSSL=false
+        url: jdbc:mysql://120.79.10.205:3306/db_order_1?characterEncoding=utf-8&useSSL=false
         username: root
         password: root
       node-2:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: com.mysql.jdbc.Driver
-        url: jdbc:mysql://192.168.229.128:3306/db_order_2?characterEncoding=utf-8&useSSL=false
+        url: jdbc:mysql://120.79.10.205:3306/db_order_2?characterEncoding=utf-8&useSSL=false
         username: root
         password: root
       node-3:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: com.mysql.jdbc.Driver
-        url: jdbc:mysql://192.168.229.128:3306/db_order_3?characterEncoding=utf-8&useSSL=false
+        url: jdbc:mysql://120.79.10.205:3306/db_order_3?characterEncoding=utf-8&useSSL=false
         username: root
         password: root
     rules:

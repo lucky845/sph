@@ -17,18 +17,18 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.229.128:8848
+        server-addr: 120.79.10.205:8848
 
   # rabbitmq
   rabbitmq:
-    host: 192.168.229.128
+    host: 120.79.10.205
     port: 5672
     username: admin
     password: 123
 
   # redis
   redis:
-    host: 192.168.229.128
+    host: 120.79.10.205
     port: 6389
     database: 0
     timeout: 1800000
@@ -37,7 +37,7 @@ spring:
   #  datasource:
   #    type: com.zaxxer.hikari.HikariDataSource
   #    driver-class-name: com.mysql.jdbc.Driver
-  #    url: jdbc:mysql://192.168.229.128:3306/shop_product?characterEncoding=utf-8&useSSL=false
+  #    url: jdbc:mysql://120.79.10.205:3306/shop_product?characterEncoding=utf-8&useSSL=false
   #    username: root
   #    password: root
 
@@ -50,21 +50,21 @@ spring:
       write-node1:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: com.mysql.jdbc.Driver
-        url: jdbc:mysql://192.168.229.128:3306/shop_product_01?characterEncoding=utf-8&useSSL=false
+        url: jdbc:mysql://120.79.10.205:3306/shop_product_01?characterEncoding=utf-8&useSSL=false
         username: root
         password: root
       # 读节点1
       read-node1:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: com.mysql.jdbc.Driver
-        url: jdbc:mysql://192.168.229.128:3306/shop_product_02?characterEncoding=utf-8&useSSL=false
+        url: jdbc:mysql://120.79.10.205:3306/shop_product_02?characterEncoding=utf-8&useSSL=false
         username: root
         password: root
       # 读节点2
       read-node2:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: com.mysql.jdbc.Driver
-        url: jdbc:mysql://192.168.229.128:3306/shop_product_03?characterEncoding=utf-8&useSSL=false
+        url: jdbc:mysql://120.79.10.205:3306/shop_product_03?characterEncoding=utf-8&useSSL=false
         username: root
         password: root
     # 读写分离的策略
@@ -96,11 +96,11 @@ spring:
 
 # fastdfs地址
 fastdfs:
-  fix: http://192.168.229.128:8888/
+  fix: http://120.79.10.205:8888/
 
 # minio相关配置
 minio:
-  endpoint: http://192.168.229.128:9000
+  endpoint: http://120.79.10.205:9000
   access-key: enjoy6288
   secret-key: enjoy6288
   bucket-name: lucky845

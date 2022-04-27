@@ -8,15 +8,15 @@ spring:
   # es配置
   elasticsearch:
     rest:
-      uris: http://192.168.229.128:9200
+      uris: http://120.79.10.205:9200
 
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.229.128:8848
+        server-addr: 120.79.10.205:8848
 
   rabbitmq:
-    host: 192.168.229.128
+    host: 120.79.10.205
     port: 5672
     username: admin
     password: 123
@@ -25,7 +25,7 @@ spring:
         acknowledge-mode: manual
 
   redis:
-    host: 192.168.229.128
+    host: 120.79.10.205
     port: 6389
     database: 0
     timeout: 1800000

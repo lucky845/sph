@@ -3,7 +3,7 @@ server:
 
 spring:
   redis:
-    host: 192.168.229.128
+    host: 120.79.10.205
     port: 6389
 
   application:
@@ -12,7 +12,7 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 192.168.229.128:8848
+        server-addr: 120.79.10.205:8848
 
     gateway:
       discovery: # 是否与服务发现组件进行结合，通过 serviceId(必须设置成大写) 转发到具体的服务实例。默认为false，设为true便开启通过服务中心的自动根据 serviceId 创建路由的功能。
