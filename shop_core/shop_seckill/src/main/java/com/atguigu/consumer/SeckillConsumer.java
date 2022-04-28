@@ -119,6 +119,7 @@ public class SeckillConsumer {
         redisTemplate.delete(RedisConst.SECKILL_PRODUCT);
         redisTemplate.delete(RedisConst.BOUGHT_SECKILL_USER_ORDER);
         redisTemplate.delete(RedisConst.PREPARE_SECKILL_USERID_SKUID);
+        redisTemplate.delete(RedisConst.PREPARE_SECKILL_USERID_ORDER);
     }
 
 }
