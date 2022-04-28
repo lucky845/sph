@@ -20,4 +20,15 @@
         </dependency>
     </dependencies>
 
+    <build>
+        <!--打包插件-->
+        <finalName>shop-seckill</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+
 </project>
